@@ -1,44 +1,57 @@
-# Tenant Management Application
+# Tenant Management App
 
-## Overview
-The Tenant Management Application is designed to streamline the management of tenants, providing a user-friendly interface for both administrators and tenants. This application leverages a React frontend built with Vite for fast development and a Supabase backend for robust data management and authentication.
+This is a tenant management application built with React, Supabase, and Tailwind CSS.
 
 ## Project Structure
-The project is organized into the following main directories:
 
-- **frontend**: Contains the React application.
-  - **src**: Source files for the React application.
-    - **components**: Reusable UI components.
-    - **pages**: Page-level components representing different views.
-    - **hooks**: Custom React hooks for state management.
-    - **utils**: Helper functions for the frontend.
-    - **services**: API calls to Supabase.
-    - **styles**: Tailwind CSS configurations or custom styles.
-    - **main.jsx**: Entry point of the React application.
-  - **public**: Static assets for the frontend.
-  - **vite.config.js**: Configuration for Vite.
-  - **package.json**: Frontend dependencies and scripts.
-  - **tailwind.config.js**: Tailwind CSS configuration.
-  
-- **backend**: Contains the Supabase backend setup.
-  - **supabase**: Supabase-specific files.
-    - **migrations**: Database migration files.
-    - **policies.sql**: Security policies for the database.
-    - **seed.sql**: SQL commands to seed the database.
-    - **functions**: Optional Supabase Edge Functions.
-  - **package.json**: Backend dependencies and scripts.
-  
-- **docs**: Documentation for the project.
-  - **architecture.md**: Application architecture details.
-  - **api.md**: API endpoints documentation.
-  - **setup.md**: Guide for setting up the project locally.
-
-- **config**: Configuration files.
-  - **env.example**: Sample environment variable configuration.
-  - **supabase.env.example**: Supabase environment variable configuration.
+- `frontend`: Contains the React frontend application.
+- `backend`: Contains the Supabase backend configuration.
+- `docs`: Contains the documentation.
+- `config`: Contains the configuration files.
 
 ## Getting Started
-To get started with the Tenant Management Application, follow the setup guide located in the `docs/setup.md` file. This guide will walk you through the installation and configuration process for both the frontend and backend.
 
-## License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+### Prerequisites
+
+- Node.js
+- npm
+- Supabase account
+
+### Frontend Setup
+
+1. Navigate to the `frontend` directory:
+
+   ```bash
+   cd frontend
+   ```
+
+2. Install the dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file in the `frontend` directory and add your Supabase URL and anon key:
+
+   ```
+   VITE_SUPABASE_URL=YOUR_SUPABASE_URL
+   VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+   ```
+
+4. Run the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+### Backend Setup
+
+1. [Set up a new Supabase project](https://supabase.com/docs/guides/getting-started/quickstarts/react#create-a-project).
+
+2. Apply the database migrations located in the `backend/supabase/migrations` directory.
+
+## Next Steps
+
+- Implement the functionality for managing tenants, properties, leases, and payments.
+- Add authentication and authorization.
+- Write tests for the application.
