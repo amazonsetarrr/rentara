@@ -1,2 +1,0 @@
-# rentara
-Tenant Management System
