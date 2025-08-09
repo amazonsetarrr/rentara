@@ -1,0 +1,16 @@
+# This file contains the configuration for Supabase settings.
+
+[project]
+name = "tenant-management-app"
+region = "us-east-1"
+
+[database]
+url = "https://your-supabase-url.supabase.co"
+anon_key = "your-anon-key"
+service_role_key = "your-service-role-key"
+
+[auth]
+jwt_secret = "your-jwt-secret"
+
+[storage]
+bucket_name = "your-bucket-name"
