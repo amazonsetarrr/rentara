@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+    "build": "npx vite build",
+    "serve": "vite preview",
+    "postinstall": "chmod +x node_modules/.bin/vite || echo 'Permission fix not needed on Windows'"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
