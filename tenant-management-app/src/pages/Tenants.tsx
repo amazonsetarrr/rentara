@@ -35,28 +35,76 @@ const Tenants = () => {
 
   const fetchTenants = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase.from('tenants').select('*').order('created_at', { ascending: false });
-    if (error) {
-      console.error('Error fetching tenants:', error);
-      alert('Error fetching tenants');
-    } else {
-      setTenants(data || []);
+    try {
+      const { data, error } = await supabase.from('tenants').select('*').order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching tenants:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        
+        // Show more specific error messages
+        if (error.code === '42P01') {
+          alert('Database table "tenants" does not exist. Please set up the database first.');
+        } else if (error.message.includes('relation') && error.message.includes('does not exist')) {
+          alert('Database tables not found. Please run the database setup first.');
+        } else {
+          alert(`Error fetching tenants: ${error.message}`);
+        }
+        setTenants([]);
+      } else {
+        console.log('Tenants fetched successfully:', data);
+        setTenants(data || []);
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching tenants:', err);
+      alert('An unexpected error occurred while fetching tenants. Check console for details.');
+      setTenants([]);
     }
     setIsLoading(false);
   };
 
   const addTenant = async (formData: Omit<Tenant, 'id' | 'created_at'>) => {
     setIsLoading(true);
-    const { data, error } = await supabase.from('tenants').insert([formData]).select();
-    if (error) {
-      console.error('Error adding tenant:', error);
-      alert('Error adding tenant');
-    } else {
-      if (data) {
-        setTenants([data[0], ...tenants]);
-        reset();
+    console.log('Attempting to add tenant:', formData);
+    
+    try {
+      const { data, error } = await supabase.from('tenants').insert([formData]).select();
+      
+      if (error) {
+        console.error('Error adding tenant:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        
+        // Show more specific error messages
+        if (error.code === '42P01') {
+          alert('Database table "tenants" does not exist. Please set up the database first.');
+        } else if (error.message.includes('relation') && error.message.includes('does not exist')) {
+          alert('Database tables not found. Please run the database setup first.');
+        } else {
+          alert(`Error adding tenant: ${error.message}`);
+        }
+      } else {
+        console.log('Tenant added successfully:', data);
+        if (data && data.length > 0) {
+          setTenants([data[0], ...tenants]);
+          reset();
+          alert('Tenant added successfully!');
+        }
       }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert('An unexpected error occurred. Check console for details.');
     }
+    
     setIsLoading(false);
   };
 
