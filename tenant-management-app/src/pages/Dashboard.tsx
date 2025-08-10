@@ -7,7 +7,10 @@ const Dashboard = () => {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <Button>Add New Tenant</Button>
+        <div className="flex gap-3">
+          <Button>Add New Unit</Button>
+          <Button>Add New Tenant</Button>
+        </div>
       </div>
       <p className="mb-4">Welcome to the tenant management dashboard.</p>
 
