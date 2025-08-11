@@ -19,9 +19,11 @@ export const useAuthStore = create((set, get) => ({
       console.log('📝 Session data:', session?.user ? 'User found' : 'No user')
       
       if (session?.user) {
+        console.log('👤 Setting user:', session.user.email)
         set({ user: session.user })
         
         try {
+          console.log('🔍 Querying user profile...')
           const { data: profile, error: profileError } = await supabase
             .from('user_profiles')
             .select(`
@@ -37,29 +39,15 @@ export const useAuthStore = create((set, get) => ({
             .eq('id', session.user.id)
             .single()
           
+          console.log('📊 Profile query result:', { profile, profileError })
+          
           if (profile) {
+            console.log('✅ Profile loaded successfully')
             set({ profile })
           } else {
-            console.warn('Profile not found, creating fallback:', profileError)
+            console.warn('⚠️ Profile not found, creating fallback:', profileError)
             // Create a fallback profile if database query fails
-            set({ 
-              profile: {
-                id: session.user.id,
-                email: session.user.email,
-                full_name: session.user.email?.split('@')[0] || 'User',
-                role: 'owner',
-                organizations: {
-                  name: 'Your Organization',
-                  subscription_plan: 'Trial'
-                }
-              }
-            })
-          }
-        } catch (error) {
-          console.warn('Profile query failed, using fallback:', error)
-          // Create a fallback profile if database query fails
-          set({ 
-            profile: {
+            const fallbackProfile = {
               id: session.user.id,
               email: session.user.email,
               full_name: session.user.email?.split('@')[0] || 'User',
@@ -69,7 +57,24 @@ export const useAuthStore = create((set, get) => ({
                 subscription_plan: 'Trial'
               }
             }
-          })
+            console.log('🔄 Using fallback profile:', fallbackProfile)
+            set({ profile: fallbackProfile })
+          }
+        } catch (error) {
+          console.warn('❌ Profile query failed, using fallback:', error)
+          // Create a fallback profile if database query fails
+          const fallbackProfile = {
+            id: session.user.id,
+            email: session.user.email,
+            full_name: session.user.email?.split('@')[0] || 'User',
+            role: 'owner',
+            organizations: {
+              name: 'Your Organization',
+              subscription_plan: 'Trial'
+            }
+          }
+          console.log('🔄 Using fallback profile:', fallbackProfile)
+          set({ profile: fallbackProfile })
         }
       } else {
         console.log('❌ No session found')
