@@ -12,18 +12,14 @@ export const useAuthStore = create((set, get) => ({
   
   checkAuth: async () => {
     try {
-      console.log('🔄 Starting auth check...')
       set({ loading: true })
       
       const { data: { session } } = await supabase.auth.getSession()
-      console.log('📝 Session data:', session?.user ? 'User found' : 'No user')
       
       if (session?.user) {
-        console.log('👤 Setting user:', session.user.email)
         set({ user: session.user })
         
         try {
-          console.log('🔍 Querying user profile...')
           const { data: profile, error: profileError } = await supabase
             .from('user_profiles')
             .select(`
@@ -39,13 +35,9 @@ export const useAuthStore = create((set, get) => ({
             .eq('id', session.user.id)
             .single()
           
-          console.log('📊 Profile query result:', { profile, profileError })
-          
           if (profile) {
-            console.log('✅ Profile loaded successfully')
             set({ profile })
           } else {
-            console.warn('⚠️ Profile not found, creating fallback:', profileError)
             // Create a fallback profile if database query fails
             const fallbackProfile = {
               id: session.user.id,
@@ -57,11 +49,9 @@ export const useAuthStore = create((set, get) => ({
                 subscription_plan: 'Trial'
               }
             }
-            console.log('🔄 Using fallback profile:', fallbackProfile)
             set({ profile: fallbackProfile })
           }
         } catch (error) {
-          console.warn('❌ Profile query failed, using fallback:', error)
           // Create a fallback profile if database query fails
           const fallbackProfile = {
             id: session.user.id,
@@ -73,18 +63,15 @@ export const useAuthStore = create((set, get) => ({
               subscription_plan: 'Trial'
             }
           }
-          console.log('🔄 Using fallback profile:', fallbackProfile)
           set({ profile: fallbackProfile })
         }
       } else {
-        console.log('❌ No session found')
         set({ user: null, profile: null })
       }
     } catch (error) {
-      console.error('❌ Auth check error:', error)
+      console.error('Auth check error:', error)
       set({ user: null, profile: null })
     } finally {
-      console.log('✅ Auth check completed')
       set({ loading: false })
     }
   },

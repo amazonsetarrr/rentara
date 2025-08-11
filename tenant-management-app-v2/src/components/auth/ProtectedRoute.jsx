@@ -6,11 +6,8 @@ import Spinner from '../ui/Spinner'
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuthStore()
 
-  console.log('🛡️ ProtectedRoute state:', { loading, hasUser: !!user })
-
   // Show loading spinner only if auth store is loading
   if (loading) {
-    console.log('🔄 ProtectedRoute: Auth store is loading, showing spinner')
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -22,10 +19,8 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (!user) {
-    console.log('🔐 ProtectedRoute: No user, redirecting to auth')
     return <Navigate to="/auth" replace />
   }
 
-  console.log('✅ ProtectedRoute: User authenticated, showing dashboard')
   return children
 }

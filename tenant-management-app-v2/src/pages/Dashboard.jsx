@@ -132,21 +132,36 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold">Quick Actions</h3>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <Button className="w-full justify-start" variant="outline">
-                  <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="space-y-2">
+                <Button 
+                  className="w-full justify-start flex items-center" 
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alert('Add Property feature coming soon!')}
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   Add New Property
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <Button 
+                  className="w-full justify-start flex items-center" 
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alert('Add Unit feature coming soon!')}
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   Add New Unit
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <Button 
+                  className="w-full justify-start flex items-center" 
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alert('Add Tenant feature coming soon!')}
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   Add New Tenant
