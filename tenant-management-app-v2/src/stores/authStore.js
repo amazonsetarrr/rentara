@@ -12,9 +12,11 @@ export const useAuthStore = create((set, get) => ({
   
   checkAuth: async () => {
     try {
+      console.log('🔄 Starting auth check...')
       set({ loading: true })
       
       const { data: { session } } = await supabase.auth.getSession()
+      console.log('📝 Session data:', session?.user ? 'User found' : 'No user')
       
       if (session?.user) {
         set({ user: session.user })
@@ -70,12 +72,14 @@ export const useAuthStore = create((set, get) => ({
           })
         }
       } else {
+        console.log('❌ No session found')
         set({ user: null, profile: null })
       }
     } catch (error) {
-      console.error('Auth check error:', error)
+      console.error('❌ Auth check error:', error)
       set({ user: null, profile: null })
     } finally {
+      console.log('✅ Auth check completed')
       set({ loading: false })
     }
   },
