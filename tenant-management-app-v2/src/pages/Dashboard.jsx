@@ -15,8 +15,30 @@ export default function Dashboard() {
   }, [])
 
   const loadStats = async () => {
-    const { data } = await organizationsService.getOrganizationStats()
-    setStats(data)
+    try {
+      const { data, error } = await organizationsService.getOrganizationStats()
+      if (data) {
+        setStats(data)
+      } else {
+        console.warn('Stats loading failed, using fallback:', error)
+        // Use fallback stats when database queries fail
+        setStats({
+          total_properties: 0,
+          total_units: 0,
+          active_tenants: 0,
+          occupancy_rate: 0
+        })
+      }
+    } catch (error) {
+      console.warn('Stats loading error, using fallback:', error)
+      // Use fallback stats when there's an error
+      setStats({
+        total_properties: 0,
+        total_units: 0,
+        active_tenants: 0,
+        occupancy_rate: 0
+      })
+    }
     setLoading(false)
   }
 

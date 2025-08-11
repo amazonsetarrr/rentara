@@ -19,23 +19,55 @@ export const useAuthStore = create((set, get) => ({
       if (session?.user) {
         set({ user: session.user })
         
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select(`
-            *,
-            organizations (
-              id,
-              name,
-              subscription_status,
-              subscription_plan,
-              trial_ends_at
-            )
-          `)
-          .eq('id', session.user.id)
-          .single()
-        
-        if (profile) {
-          set({ profile })
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('user_profiles')
+            .select(`
+              *,
+              organizations (
+                id,
+                name,
+                subscription_status,
+                subscription_plan,
+                trial_ends_at
+              )
+            `)
+            .eq('id', session.user.id)
+            .single()
+          
+          if (profile) {
+            set({ profile })
+          } else {
+            console.warn('Profile not found, creating fallback:', profileError)
+            // Create a fallback profile if database query fails
+            set({ 
+              profile: {
+                id: session.user.id,
+                email: session.user.email,
+                full_name: session.user.email?.split('@')[0] || 'User',
+                role: 'owner',
+                organizations: {
+                  name: 'Your Organization',
+                  subscription_plan: 'Trial'
+                }
+              }
+            })
+          }
+        } catch (error) {
+          console.warn('Profile query failed, using fallback:', error)
+          // Create a fallback profile if database query fails
+          set({ 
+            profile: {
+              id: session.user.id,
+              email: session.user.email,
+              full_name: session.user.email?.split('@')[0] || 'User',
+              role: 'owner',
+              organizations: {
+                name: 'Your Organization',
+                subscription_plan: 'Trial'
+              }
+            }
+          })
         }
       } else {
         set({ user: null, profile: null })
