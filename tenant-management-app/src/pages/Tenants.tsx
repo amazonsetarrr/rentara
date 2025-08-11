@@ -110,22 +110,22 @@ const Tenants = () => {
 
   const updateTenant = async (formData: Omit<Tenant, 'id' | 'created_at'>) => {
     if (!editingTenant) return;
-    
+
     setIsLoading(true);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('tenants')
       .update(formData)
-      .eq('id', editingTenant.id);
-    
+      .eq('id', editingTenant.id)
+      .select();
+
     if (error) {
       console.error('Error updating tenant:', error);
-      alert('Error updating tenant');
+      alert(`Error updating tenant: ${error.message}`);
     } else {
-      setTenants(tenants.map(t => 
-        t.id === editingTenant.id 
-          ? { ...t, ...formData }
-          : t
-      ));
+      if (data && data.length > 0) {
+        setTenants(tenants.map(t => (t.id === data[0].id ? data[0] : t)));
+        alert('Tenant updated successfully!');
+      }
       setEditingTenant(null);
       reset();
     }
