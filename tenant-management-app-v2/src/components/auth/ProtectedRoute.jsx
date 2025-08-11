@@ -8,9 +8,9 @@ export default function ProtectedRoute({ children }) {
   const [initializing, setInitializing] = useState(true)
 
   useEffect(() => {
-    console.log('🛡️ ProtectedRoute: Starting auth check...')
+    console.log('🛡️ ProtectedRoute: Starting initial auth check...')
     checkAuth().finally(() => {
-      console.log('🛡️ ProtectedRoute: Auth check finished')
+      console.log('🛡️ ProtectedRoute: Initial auth check finished')
       setInitializing(false)
     })
   }, [])
