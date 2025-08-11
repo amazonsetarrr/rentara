@@ -43,9 +43,18 @@ export default function SignupForm({ onSwitchToLogin }) {
     )
     
     if (error) {
-      setError(error.message)
+      console.error('Signup form error:', error)
+      setError(error.message || 'Registration failed. Please try again.')
     } else {
-      await checkAuth()
+      console.log('Signup successful:', data)
+      
+      if (data.needsConfirmation) {
+        setError('') // Clear any errors
+        alert('Registration successful! Please check your email to confirm your account before signing in.')
+        onSwitchToLogin() // Switch to login form
+      } else {
+        await checkAuth()
+      }
     }
     
     setLoading(false)
