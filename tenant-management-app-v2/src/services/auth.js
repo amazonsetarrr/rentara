@@ -19,28 +19,16 @@ export const authService = {
         throw authError
       }
 
-      // Check if user was created but needs confirmation
-      if (authData.user && !authData.session) {
-        console.log('User created but needs email confirmation')
-        return { 
-          data: { 
-            user: authData.user, 
-            needsConfirmation: true,
-            message: 'Please check your email to confirm your account before signing in.'
-          }, 
-          error: null 
-        }
-      }
-
       if (!authData.user) {
         console.error('No user returned from signup')
         throw new Error('Registration failed - no user created')
       }
 
-      // If we have a session, try to create organization and profile
-      // Note: This may fail due to RLS policies, but we'll handle it gracefully
+      // Always try to create organization and profile, regardless of session
+      console.log('User created:', authData.user.id, 'Session:', !!authData.session)
+      
       try {
-        // 2. Create organization
+        // 2. Create organization first
         const orgSlug = organizationName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
         console.log('Creating organization:', { name: organizationName, slug: orgSlug })
         
@@ -58,38 +46,59 @@ export const authService = {
         console.log('Organization creation result:', { orgData, orgError })
         
         if (orgError) {
-          console.error('Organization error:', orgError)
-          // Don't throw here - the user was created successfully
-          console.warn('Could not create organization immediately, user can do this later')
+          console.error('Organization creation failed:', orgError)
+          throw orgError
         }
 
         // 3. Create user profile
-        if (orgData) {
-          console.log('Creating user profile for user:', authData.user.id)
-          
-          const { error: profileError } = await supabase
-            .from('user_profiles')
-            .insert([{
-              id: authData.user.id,
-              email,
-              full_name: fullName,
-              organization_id: orgData.id,
-              role: 'owner'
-            }])
+        console.log('Creating user profile for user:', authData.user.id)
+        
+        const { data: profileData, error: profileError } = await supabase
+          .from('user_profiles')
+          .insert([{
+            id: authData.user.id,
+            email,
+            full_name: fullName,
+            organization_id: orgData.id,
+            role: 'owner'
+          }])
+          .select()
 
-          console.log('Profile creation result:', { profileError })
-          
-          if (profileError) {
-            console.error('Profile error:', profileError)
-            console.warn('Could not create user profile immediately, user can do this later')
+        console.log('Profile creation result:', { profileData, profileError })
+        
+        if (profileError) {
+          console.error('Profile creation failed:', profileError)
+          throw profileError
+        }
+
+        console.log('Registration successful - user and profile created')
+        
+        // Check if user needs email confirmation
+        if (!authData.session) {
+          return { 
+            data: { 
+              user: authData.user, 
+              organization: orgData,
+              needsConfirmation: true,
+              message: 'Account created! Please check your email to confirm your account before signing in.'
+            }, 
+            error: null 
           }
         }
-      } catch (dbError) {
-        console.warn('Database operations failed, but user was created:', dbError)
-      }
 
-      console.log('Registration successful')
-      return { data: { user: authData.user }, error: null }
+        return { data: { user: authData.user, organization: orgData }, error: null }
+        
+      } catch (dbError) {
+        console.error('Database operations failed:', dbError)
+        // If profile creation fails, still return success for auth but with warning
+        return { 
+          data: { 
+            user: authData.user,
+            warning: 'Account created but profile setup incomplete. Please contact support.'
+          }, 
+          error: null 
+        }
+      }
     } catch (error) {
       console.error('Registration failed:', error)
       return { data: null, error }
