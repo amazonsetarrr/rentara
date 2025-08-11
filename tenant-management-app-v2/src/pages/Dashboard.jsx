@@ -4,11 +4,20 @@ import { organizationsService } from '../services/organizations'
 import Card, { CardHeader, CardContent } from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
+import Modal from '../components/ui/Modal'
+import AddPropertyForm from '../components/forms/AddPropertyForm'
+import AddUnitForm from '../components/forms/AddUnitForm'
+import AddTenantForm from '../components/forms/AddTenantForm'
 
 export default function Dashboard() {
   const { profile } = useAuthStore()
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [modals, setModals] = useState({
+    addProperty: false,
+    addUnit: false,
+    addTenant: false
+  })
 
   useEffect(() => {
     loadStats()
@@ -40,6 +49,20 @@ export default function Dashboard() {
       })
     }
     setLoading(false)
+  }
+
+  const openModal = (modalName) => {
+    setModals(prev => ({ ...prev, [modalName]: true }))
+  }
+
+  const closeModal = (modalName) => {
+    setModals(prev => ({ ...prev, [modalName]: false }))
+  }
+
+  const handleFormSuccess = async (modalName) => {
+    closeModal(modalName)
+    // Reload stats to reflect changes
+    await loadStats()
   }
 
   if (loading) {
@@ -137,7 +160,7 @@ export default function Dashboard() {
                   className="w-full justify-start flex items-center" 
                   variant="outline"
                   size="sm"
-                  onClick={() => alert('Add Property feature coming soon!')}
+                  onClick={() => openModal('addProperty')}
                 >
                   <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -148,7 +171,7 @@ export default function Dashboard() {
                   className="w-full justify-start flex items-center" 
                   variant="outline"
                   size="sm"
-                  onClick={() => alert('Add Unit feature coming soon!')}
+                  onClick={() => openModal('addUnit')}
                 >
                   <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -159,7 +182,7 @@ export default function Dashboard() {
                   className="w-full justify-start flex items-center" 
                   variant="outline"
                   size="sm"
-                  onClick={() => alert('Add Tenant feature coming soon!')}
+                  onClick={() => openModal('addTenant')}
                 >
                   <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -194,6 +217,43 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Modals */}
+        <Modal 
+          isOpen={modals.addProperty} 
+          onClose={() => closeModal('addProperty')}
+          title="Add New Property"
+          size="lg"
+        >
+          <AddPropertyForm 
+            onSuccess={() => handleFormSuccess('addProperty')}
+            onCancel={() => closeModal('addProperty')}
+          />
+        </Modal>
+
+        <Modal 
+          isOpen={modals.addUnit} 
+          onClose={() => closeModal('addUnit')}
+          title="Add New Unit"
+          size="lg"
+        >
+          <AddUnitForm 
+            onSuccess={() => handleFormSuccess('addUnit')}
+            onCancel={() => closeModal('addUnit')}
+          />
+        </Modal>
+
+        <Modal 
+          isOpen={modals.addTenant} 
+          onClose={() => closeModal('addTenant')}
+          title="Add New Tenant"
+          size="lg"
+        >
+          <AddTenantForm 
+            onSuccess={() => handleFormSuccess('addTenant')}
+            onCancel={() => closeModal('addTenant')}
+          />
+        </Modal>
     </div>
   )
 }

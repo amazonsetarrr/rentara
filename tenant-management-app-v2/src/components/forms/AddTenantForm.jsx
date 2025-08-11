@@ -40,7 +40,10 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
 
   const loadUnits = async () => {
     const { data, error } = await unitsService.getVacantUnits()
-    if (data) {
+    
+    if (error) {
+      setError('Failed to load vacant units: ' + error.message)
+    } else if (data) {
       setUnits(data.map(u => ({
         value: u.id,
         label: `${u.properties.name} - Unit ${u.unit_number} (${u.unit_type})`
@@ -181,36 +184,36 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
         />
 
         <Input
-          label="Monthly Rent"
+          label="Monthly Rent (RM)"
           type="number"
           name="rent_amount"
           value={formData.rent_amount}
           onChange={handleChange}
           step="0.01"
           min="0"
-          placeholder="1250.00"
+          placeholder="1500.00"
         />
 
         <Input
-          label="Deposit Paid"
+          label="Deposit Paid (RM)"
           type="number"
           name="deposit_paid"
           value={formData.deposit_paid}
           onChange={handleChange}
           step="0.01"
           min="0"
-          placeholder="1250.00"
+          placeholder="1500.00"
         />
 
         <Input
-          label="Security Deposit"
+          label="Security Deposit (RM)"
           type="number"
           name="security_deposit"
           value={formData.security_deposit}
           onChange={handleChange}
           step="0.01"
           min="0"
-          placeholder="1250.00"
+          placeholder="1500.00"
         />
 
         <Input

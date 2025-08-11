@@ -7,6 +7,7 @@ import Badge from '../components/ui/Badge'
 import Table, { TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/Table'
 import AddUnitForm from '../components/forms/AddUnitForm'
 import Spinner from '../components/ui/Spinner'
+import { formatCurrency } from '../utils/currency'
 
 const STATUS_COLORS = {
   vacant: 'success',
@@ -154,7 +155,7 @@ export default function UnitsPage() {
                     <TableCell>
                       {unit.rent_amount ? (
                         <div className="font-medium">
-                          ${unit.rent_amount.toLocaleString()}
+                          {formatCurrency(unit.rent_amount)}
                         </div>
                       ) : (
                         <span className="text-gray-400">Not set</span>

@@ -6,12 +6,17 @@ import Modal from '../components/ui/Modal'
 import Badge from '../components/ui/Badge'
 import Table, { TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/Table'
 import AddPropertyForm from '../components/forms/AddPropertyForm'
+import EditPropertyForm from '../components/forms/EditPropertyForm'
+import PropertyDetailsModal from '../components/modals/PropertyDetailsModal'
 import Spinner from '../components/ui/Spinner'
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
+  const [selectedProperty, setSelectedProperty] = useState(null)
 
   useEffect(() => {
     loadProperties()
@@ -29,6 +34,12 @@ export default function PropertiesPage() {
     setShowAddModal(false)
   }
 
+  const handleEditProperty = (updatedProperty) => {
+    setProperties(prev => prev.map(p => p.id === updatedProperty.id ? updatedProperty : p))
+    setShowEditModal(false)
+    setSelectedProperty(null)
+  }
+
   const handleDeleteProperty = async (id) => {
     if (!confirm('Are you sure you want to delete this property?')) return
     
@@ -36,6 +47,23 @@ export default function PropertiesPage() {
     if (!error) {
       setProperties(prev => prev.filter(p => p.id !== id))
     }
+  }
+
+  const openEditModal = (property) => {
+    setSelectedProperty(property)
+    setShowEditModal(true)
+  }
+
+  const openDetailsModal = (property) => {
+    setSelectedProperty(property)
+    setShowDetailsModal(true)
+  }
+
+  const closeModals = () => {
+    setShowAddModal(false)
+    setShowEditModal(false)
+    setShowDetailsModal(false)
+    setSelectedProperty(null)
   }
 
   if (loading) {
@@ -133,8 +161,19 @@ export default function PropertiesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => openDetailsModal(property)}
+                        >
                           View
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => openEditModal(property)}
+                        >
+                          Edit
                         </Button>
                         <Button 
                           variant="danger" 
@@ -153,17 +192,41 @@ export default function PropertiesPage() {
         </Card>
       )}
 
+      {/* Add Property Modal */}
       <Modal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={closeModals}
         title="Add New Property"
         size="lg"
       >
         <AddPropertyForm
           onSuccess={handleAddProperty}
-          onCancel={() => setShowAddModal(false)}
+          onCancel={closeModals}
         />
       </Modal>
+
+      {/* Edit Property Modal */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={closeModals}
+        title="Edit Property"
+        size="lg"
+      >
+        {selectedProperty && (
+          <EditPropertyForm
+            property={selectedProperty}
+            onSuccess={handleEditProperty}
+            onCancel={closeModals}
+          />
+        )}
+      </Modal>
+
+      {/* Property Details Modal */}
+      <PropertyDetailsModal
+        isOpen={showDetailsModal}
+        onClose={closeModals}
+        propertyId={selectedProperty?.id}
+      />
     </div>
   )
 }

@@ -7,6 +7,7 @@ import Badge from '../components/ui/Badge'
 import Table, { TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/Table'
 import AddTenantForm from '../components/forms/AddTenantForm'
 import Spinner from '../components/ui/Spinner'
+import { formatCurrency } from '../utils/currency'
 
 const STATUS_COLORS = {
   active: 'success',
@@ -229,7 +230,7 @@ export default function TenantsPage() {
                     <TableCell>
                       {tenant.rent_amount ? (
                         <div className="font-medium">
-                          ${tenant.rent_amount.toLocaleString()}/mo
+                          {formatCurrency(tenant.rent_amount)}/mo
                         </div>
                       ) : (
                         <span className="text-gray-400">Not set</span>

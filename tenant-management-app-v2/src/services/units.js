@@ -69,7 +69,7 @@ export const unitsService = {
         )
       `)
       .eq('status', 'vacant')
-      .order('properties.name', { ascending: true })
+      .order('unit_number', { ascending: true })
     
     return { data, error }
   },
