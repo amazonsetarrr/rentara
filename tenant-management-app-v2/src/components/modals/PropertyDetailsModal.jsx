@@ -12,17 +12,17 @@ export default function PropertyDetailsModal({ isOpen, onClose, propertyId }) {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    const loadProperty = async () => {
+      setLoading(true)
+      const { data } = await propertiesService.getProperty(propertyId)
+      setProperty(data)
+      setLoading(false)
+    }
+
     if (isOpen && propertyId) {
       loadProperty()
     }
   }, [isOpen, propertyId])
-
-  const loadProperty = async () => {
-    setLoading(true)
-    const { data } = await propertiesService.getProperty(propertyId)
-    setProperty(data)
-    setLoading(false)
-  }
 
   if (!isOpen) return null
 

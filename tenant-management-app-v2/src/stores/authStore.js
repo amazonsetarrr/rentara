@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '../services/supabase'
 
-export const useAuthStore = create((set, get) => ({
+export const useAuthStore = create((set) => ({
   user: null,
   profile: null,
   loading: true,
@@ -20,7 +20,7 @@ export const useAuthStore = create((set, get) => ({
         set({ user: session.user })
         
         try {
-          const { data: profile, error: profileError } = await supabase
+          const { data: profile } = await supabase
             .from('user_profiles')
             .select(`
               *,
@@ -51,7 +51,7 @@ export const useAuthStore = create((set, get) => ({
             }
             set({ profile: fallbackProfile })
           }
-        } catch (error) {
+        } catch {
           // Create a fallback profile if database query fails
           const fallbackProfile = {
             id: session.user.id,
