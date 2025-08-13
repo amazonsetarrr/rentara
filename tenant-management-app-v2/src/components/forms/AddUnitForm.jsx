@@ -45,7 +45,7 @@ export default function AddUnitForm({ onSuccess, onCancel, propertyId = null }) 
   }, [])
 
   const loadProperties = async () => {
-    const { data, error } = await propertiesService.getPropertiesOptions()
+    const { data } = await propertiesService.getPropertiesOptions()
     if (data) {
       setProperties(data.map(p => ({ value: p.id, label: p.name })))
     }

@@ -19,7 +19,7 @@ export default function LoginForm({ onSwitchToSignup }) {
     setLoading(true)
     setError('')
 
-    const { data, error } = await authService.signIn(formData.email, formData.password)
+    const { error } = await authService.signIn(formData.email, formData.password)
     
     if (error) {
       setError(error.message)
