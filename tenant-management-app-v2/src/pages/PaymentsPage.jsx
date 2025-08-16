@@ -7,6 +7,7 @@ import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
 import Select from '../components/ui/Select'
 import Input from '../components/ui/Input'
+import RecordPaymentModal from '../components/modals/RecordPaymentModal'
 import { formatCurrency } from '../utils/currency'
 
 const PAYMENT_STATUS_OPTIONS = [
@@ -27,6 +28,10 @@ export default function PaymentsPage() {
     tenant_search: '',
     from_date: '',
     to_date: ''
+  })
+  const [recordPaymentModal, setRecordPaymentModal] = useState({
+    isOpen: false,
+    payment: null
   })
 
   useEffect(() => {
@@ -67,6 +72,25 @@ export default function PaymentsPage() {
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleRecordPayment = (payment) => {
+    setRecordPaymentModal({
+      isOpen: true,
+      payment: payment
+    })
+  }
+
+  const handleCloseRecordPaymentModal = () => {
+    setRecordPaymentModal({
+      isOpen: false,
+      payment: null
+    })
+  }
+
+  const handlePaymentRecorded = () => {
+    // Refresh payments data after recording payment
+    loadPaymentsData()
   }
 
   const getStatusBadgeVariant = (status) => {
@@ -156,7 +180,11 @@ export default function PaymentsPage() {
       render: (payment) => (
         <div className="flex space-x-2">
           {payment.status !== 'paid' && (
-            <Button size="sm" variant="primary">
+            <Button 
+              size="sm" 
+              variant="primary"
+              onClick={() => handleRecordPayment(payment)}
+            >
               Record Payment
             </Button>
           )}
@@ -186,7 +214,7 @@ export default function PaymentsPage() {
         </div>
         <div className="flex space-x-3">
           <Button variant="outline">Generate Rent</Button>
-          <Button>Record Payment</Button>
+          <Button>Add Payment</Button>
         </div>
       </div>
 
@@ -318,6 +346,14 @@ export default function PaymentsPage() {
           />
         </CardContent>
       </Card>
+
+      {/* Record Payment Modal */}
+      <RecordPaymentModal
+        isOpen={recordPaymentModal.isOpen}
+        onClose={handleCloseRecordPaymentModal}
+        payment={recordPaymentModal.payment}
+        onPaymentRecorded={handlePaymentRecorded}
+      />
     </div>
   )
 }
