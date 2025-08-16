@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import PropertiesPage from './pages/PropertiesPage'
 import UnitsPage from './pages/UnitsPage'
 import TenantsPage from './pages/TenantsPage'
+import PaymentsPage from './pages/PaymentsPage'
 import Spinner from './components/ui/Spinner'
 import SystemOwnerApp from './SystemOwnerApp'
 
@@ -73,6 +74,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <TenantsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/payments" 
+                element={
+                  <ProtectedRoute>
+                    <PaymentsPage />
                   </ProtectedRoute>
                 } 
               />

@@ -77,16 +77,46 @@ export const useAuthStore = create((set) => ({
   },
 
   signOut: async () => {
-    await supabase.auth.signOut()
-    set({ user: null, profile: null })
+    try {
+      console.log('Starting sign out process...')
+      
+      // Clear state first for immediate UI update
+      set({ user: null, profile: null, loading: false })
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Supabase sign out error:', error)
+      }
+      
+      console.log('Sign out process completed')
+      
+      // Force redirect to auth page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth'
+      }
+    } catch (error) {
+      console.error('Sign out error:', error)
+      // Clear state even if there's an error
+      set({ user: null, profile: null, loading: false })
+      
+      // Still try to redirect
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth'
+      }
+    }
   }
 }))
 
 supabase.auth.onAuthStateChange((event, session) => {
+  console.log('Auth state change:', event, !!session)
+  
   if (event === 'SIGNED_OUT') {
+    console.log('Auth state listener: User signed out')
     useAuthStore.getState().setUser(null)
     useAuthStore.getState().setProfile(null)
-  } else if (session?.user) {
+  } else if (session?.user && event === 'SIGNED_IN') {
+    console.log('Auth state listener: User signed in')
     useAuthStore.getState().setUser(session.user)
   }
 })

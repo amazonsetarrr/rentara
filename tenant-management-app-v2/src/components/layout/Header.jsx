@@ -5,7 +5,13 @@ export default function Header({ onMenuClick }) {
   const { profile, signOut } = useAuthStore()
 
   const handleSignOut = async () => {
-    await signOut()
+    console.log('Sign out clicked')
+    try {
+      await signOut()
+      console.log('Sign out completed')
+    } catch (error) {
+      console.error('Sign out error:', error)
+    }
   }
 
   return (
