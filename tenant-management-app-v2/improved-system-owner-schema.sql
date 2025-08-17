@@ -1,6 +1,10 @@
 -- IMPROVED System Owner Schema - Complete Separation
 -- This approach completely separates system owners from tenant users
 
+-- Enable pgcrypto extension for password hashing
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated;
+
 -- 1. Create a separate auth schema for system owners
 CREATE SCHEMA IF NOT EXISTS system_auth;
 
@@ -152,16 +156,16 @@ CREATE INDEX idx_system_owner_sessions_expires ON system_auth.system_owner_sessi
 CREATE OR REPLACE FUNCTION system_auth.hash_password(password TEXT)
 RETURNS TEXT AS $$
 BEGIN
-  -- In production, use proper password hashing like bcrypt
-  -- This is just for demonstration
-  RETURN encode(digest(password || 'salt', 'sha256'), 'hex');
+  -- Use pgcrypto to hash the password with bcrypt
+  RETURN public.crypt(password, public.gen_salt('bf'));
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION system_auth.verify_password(password TEXT, hash TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN hash = system_auth.hash_password(password);
+  -- Use pgcrypto to verify the password against the hash
+  RETURN hash = public.crypt(password, hash);
 END;
 $$ LANGUAGE plpgsql;
 
