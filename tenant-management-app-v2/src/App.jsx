@@ -9,6 +9,7 @@ import PropertiesPage from './pages/PropertiesPage'
 import UnitsPage from './pages/UnitsPage'
 import TenantsPage from './pages/TenantsPage'
 import PaymentsPage from './pages/PaymentsPage'
+import ReportsPage from './pages/ReportsPage'
 import Spinner from './components/ui/Spinner'
 import SystemOwnerApp from './SystemOwnerApp'
 
@@ -89,10 +90,7 @@ function App() {
                 path="/reports" 
                 element={
                   <ProtectedRoute>
-                    <div className="text-center py-12">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">Reports</h2>
-                      <p className="text-gray-600">Coming soon...</p>
-                    </div>
+                    <ReportsPage />
                   </ProtectedRoute>
                 } 
               />
