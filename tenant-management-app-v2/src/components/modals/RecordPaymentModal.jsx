@@ -5,8 +5,10 @@ import Input from '../ui/Input'
 import Select from '../ui/Select'
 import { paymentsService } from '../../services/payments'
 import { formatCurrency } from '../../utils/currency'
+import { useLogger } from '../../hooks/useLogger'
 
 export default function RecordPaymentModal({ isOpen, onClose, payment, onPaymentRecorded }) {
+  const { logModalOpen, logModalClose, logFormSubmit, logError, logAction } = useLogger()
   const [formData, setFormData] = useState({
     amount: '',
     payment_method_id: '',
@@ -20,6 +22,7 @@ export default function RecordPaymentModal({ isOpen, onClose, payment, onPayment
 
   useEffect(() => {
     if (isOpen) {
+      logModalOpen('Record Payment Modal', { paymentId: payment?.id })
       loadPaymentMethods()
       // Set default amount to remaining balance
       if (payment) {
@@ -30,7 +33,7 @@ export default function RecordPaymentModal({ isOpen, onClose, payment, onPayment
         }))
       }
     }
-  }, [isOpen, payment])
+  }, [isOpen, payment, logModalOpen])
 
   const loadPaymentMethods = async () => {
     const { data } = await paymentsService.getPaymentMethods()
@@ -77,7 +80,16 @@ export default function RecordPaymentModal({ isOpen, onClose, payment, onPayment
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!validateForm()) return
+    logFormSubmit('Record Payment Form', {
+      paymentId: payment?.id,
+      amount: formData.amount,
+      paymentMethodId: formData.payment_method_id
+    })
+    
+    if (!validateForm()) {
+      logError('Form Validation Failed', 'Record Payment form validation errors', { errors })
+      return
+    }
 
     setLoading(true)
     try {
@@ -97,6 +109,12 @@ export default function RecordPaymentModal({ isOpen, onClose, payment, onPayment
         throw error
       }
 
+      logAction('Payment Recorded Successfully', {
+        paymentId: payment.id,
+        transactionId: data?.id,
+        amount: parseFloat(formData.amount)
+      })
+
       // Call callback to refresh payments list
       if (onPaymentRecorded) {
         onPaymentRecorded()
@@ -113,7 +131,10 @@ export default function RecordPaymentModal({ isOpen, onClose, payment, onPayment
       })
       setErrors({})
     } catch (error) {
-      console.error('Error recording payment:', error)
+      logError('Payment Recording Failed', error, {
+        paymentId: payment?.id,
+        formData: transactionData
+      })
       setErrors({ submit: 'Failed to record payment. Please try again.' })
     } finally {
       setLoading(false)
@@ -121,6 +142,7 @@ export default function RecordPaymentModal({ isOpen, onClose, payment, onPayment
   }
 
   const handleClose = () => {
+    logModalClose('Record Payment Modal', { paymentId: payment?.id })
     setFormData({
       amount: '',
       payment_method_id: '',
