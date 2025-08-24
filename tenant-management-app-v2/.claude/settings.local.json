@@ -24,7 +24,8 @@
       "Bash(timeout:*)",
       "Bash(git pull:*)",
       "Bash(git fetch:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": []
   }
