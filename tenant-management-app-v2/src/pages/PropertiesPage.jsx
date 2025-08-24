@@ -9,8 +9,10 @@ import AddPropertyForm from '../components/forms/AddPropertyForm'
 import EditPropertyForm from '../components/forms/EditPropertyForm'
 import PropertyDetailsModal from '../components/modals/PropertyDetailsModal'
 import Spinner from '../components/ui/Spinner'
+import { useLogger } from '../hooks/useLogger'
 
 export default function PropertiesPage() {
+  const { logPageView, logError, logAction } = useLogger()
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -19,14 +21,28 @@ export default function PropertiesPage() {
   const [selectedProperty, setSelectedProperty] = useState(null)
 
   useEffect(() => {
+    logPageView('Properties Page')
     loadProperties()
-  }, [])
+  }, [logPageView])
 
   const loadProperties = async () => {
     setLoading(true)
-    const { data } = await propertiesService.getProperties()
-    setProperties(data || [])
-    setLoading(false)
+    try {
+      logAction('Loading Properties', { source: 'PropertiesPage' })
+      const { data, error } = await propertiesService.getProperties()
+      if (error) {
+        logError('Properties Load Failed', error, { service: 'propertiesService.getProperties' })
+        setProperties([])
+      } else {
+        logAction('Properties Loaded Successfully', { count: data?.length || 0 })
+        setProperties(data || [])
+      }
+    } catch (error) {
+      logError('Properties Load Exception', error, { service: 'propertiesService.getProperties' })
+      setProperties([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleAddProperty = (newProperty) => {

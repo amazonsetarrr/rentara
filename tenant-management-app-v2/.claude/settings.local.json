@@ -21,7 +21,11 @@
       "Bash(npm run build:*)",
       "WebSearch",
       "Bash(npm run test:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(git commit:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": []
   }
