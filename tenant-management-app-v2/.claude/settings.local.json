@@ -19,7 +19,9 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(npm run build:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm run test:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }
