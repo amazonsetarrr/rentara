@@ -1,6 +1,10 @@
 -- CLEAN System Owner Schema - Handle Existing Policies
 -- This safely handles existing policies and creates the separate system
 
+-- Enable pgcrypto extension for password hashing
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated;
+
 -- 1. Create system_auth schema if it doesn't exist
 CREATE SCHEMA IF NOT EXISTS system_auth;
 
@@ -126,14 +130,16 @@ CREATE INDEX idx_system_owner_sessions_expires ON system_auth.system_owner_sessi
 CREATE OR REPLACE FUNCTION system_auth.hash_password(password TEXT)
 RETURNS TEXT AS $$
 BEGIN
-  RETURN encode(digest(password || 'system_salt_2024', 'sha256'), 'hex');
+  -- Use pgcrypto to hash the password with bcrypt
+  RETURN public.crypt(password, public.gen_salt('bf'));
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION system_auth.verify_password(password TEXT, hash TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN hash = system_auth.hash_password(password);
+  -- Use pgcrypto to verify the password against the hash
+  RETURN hash = public.crypt(password, hash);
 END;
 $$ LANGUAGE plpgsql;
 
