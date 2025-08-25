@@ -4,6 +4,7 @@ import Button from '../ui/Button'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import { paymentsService } from '../../services/payments'
+import { supabase } from '../../services/supabase'
 import { formatCurrency } from '../../utils/currency'
 import { useLogger } from '../../hooks/useLogger'
 
@@ -93,6 +94,12 @@ export default function RecordPaymentModal({ isOpen, onClose, payment, onPayment
 
     setLoading(true)
     try {
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
       const transactionData = {
         payment_id: payment.id,
         payment_method_id: formData.payment_method_id,
@@ -100,7 +107,7 @@ export default function RecordPaymentModal({ isOpen, onClose, payment, onPayment
         transaction_date: formData.transaction_date,
         reference: formData.reference,
         notes: formData.notes,
-        recorded_by: 'current_user' // This should come from auth context
+        recorded_by: user.id
       }
 
       const { data, error } = await paymentsService.recordPayment(transactionData)
@@ -133,7 +140,7 @@ export default function RecordPaymentModal({ isOpen, onClose, payment, onPayment
     } catch (error) {
       logError('Payment Recording Failed', error, {
         paymentId: payment?.id,
-        formData: transactionData
+        formData
       })
       setErrors({ submit: 'Failed to record payment. Please try again.' })
     } finally {

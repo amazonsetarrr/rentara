@@ -44,7 +44,22 @@ export const paymentsService = {
       }
 
       const { data, error } = await query
-      return { data, error }
+      
+      if (error) return { data: null, error }
+      
+      // Calculate paid_amount for each payment based on transactions
+      const paymentsWithPaidAmount = data?.map(payment => {
+        const totalPaid = payment.payment_transactions?.reduce((sum, transaction) => {
+          return transaction.status === 'completed' ? sum + parseFloat(transaction.amount) : sum
+        }, 0) || 0
+        
+        return {
+          ...payment,
+          paid_amount: totalPaid
+        }
+      }) || []
+
+      return { data: paymentsWithPaidAmount, error }
     } catch (error) {
       return { data: null, error }
     }
@@ -53,6 +68,14 @@ export const paymentsService = {
   // Create new payment record
   async createPayment(paymentData) {
     try {
+      // Get current user's organization
+      const user = (await supabase.auth.getUser()).data.user
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single()
+
       const { data, error } = await supabase
         .from('payments')
         .insert([{
@@ -64,6 +87,7 @@ export const paymentsService = {
           due_date: paymentData.due_date,
           is_recurring: paymentData.is_recurring || false,
           recurring_period: paymentData.recurring_period,
+          organization_id: profile.organization_id,
           created_by: paymentData.created_by
         }])
         .select(`

@@ -25,7 +25,11 @@
       "Bash(git pull:*)",
       "Bash(git fetch:*)",
       "Bash(git commit:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "Bash(gh pr create:*)",
+      "Bash(winget install:*)",
+      "Bash(choco install:*)",
+      "Bash(gh:*)"
     ],
     "deny": []
   }
