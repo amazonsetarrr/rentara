@@ -70,19 +70,19 @@ export const organizationsService = {
 
     if (!profile) return { data: null, error: 'Profile not found' }
 
-    // Get counts for properties, tenants, and detailed unit data
+    // Fetch all data to perform manual counts, avoiding potential RLS issues with .count()
     const [propertiesResult, unitsResult, tenantsResult] = await Promise.all([
       supabase
         .from('properties')
-        .select('id', { count: 'exact' })
+        .select('id')
         .eq('organization_id', profile.organization_id),
       supabase
         .from('units')
-        .select('id, status') // Fetch all unit data to correctly calculate stats
+        .select('id, status')
         .eq('organization_id', profile.organization_id),
       supabase
         .from('tenants')
-        .select('id', { count: 'exact' }) // Correctly count only active tenants
+        .select('id')
         .eq('organization_id', profile.organization_id)
         .eq('status', 'active')
     ]);
@@ -96,15 +96,17 @@ export const organizationsService = {
       return { data: null, error: 'Failed to fetch all stats' };
     }
 
+    const total_properties = propertiesResult.data?.length || 0;
     const units = unitsResult.data || [];
     const total_units = units.length;
     const occupied_units = units.filter(unit => unit.status === 'occupied').length;
+    const active_tenants = tenantsResult.data?.length || 0;
 
     const stats = {
-      total_properties: propertiesResult.count || 0,
-      total_units: total_units,
-      occupied_units: occupied_units,
-      active_tenants: tenantsResult.count || 0,
+      total_properties,
+      total_units,
+      occupied_units,
+      active_tenants,
       occupancy_rate: total_units > 0
         ? Math.round((occupied_units / total_units) * 100)
         : 0
