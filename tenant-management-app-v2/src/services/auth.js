@@ -24,81 +24,39 @@ export const authService = {
         throw new Error('Registration failed - no user created')
       }
 
-      // Always try to create organization and profile, regardless of session
-      console.log('User created:', authData.user.id, 'Session:', !!authData.session)
-      
-      try {
-        // 2. Create organization first
-        const orgSlug = organizationName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-        console.log('Creating organization:', { name: organizationName, slug: orgSlug })
-        
-        const { data: orgData, error: orgError } = await supabase
-          .from('organizations')
-          .insert([{
-            name: organizationName,
-            slug: orgSlug,
-            subscription_status: 'trial',
-            trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 days
-          }])
-          .select()
-          .single()
-
-        console.log('Organization creation result:', { orgData, orgError })
-        
-        if (orgError) {
-          console.error('Organization creation failed:', orgError)
-          throw orgError
+      // After user signup, call the database function to create org and profile
+      const { data: creationData, error: creationError } = await supabase.rpc(
+        'handle_new_user_with_organization',
+        {
+          user_id: authData.user.id,
+          email: authData.user.email,
+          full_name: fullName,
+          organization_name: organizationName
         }
+      );
 
-        // 3. Create user profile
-        console.log('Creating user profile for user:', authData.user.id)
-        
-        const { data: profileData, error: profileError } = await supabase
-          .from('user_profiles')
-          .insert([{
-            id: authData.user.id,
-            email,
-            full_name: fullName,
-            organization_id: orgData.id,
-            role: 'owner'
-          }])
-          .select()
+      if (creationError) {
+        console.error('Error creating organization and profile:', creationError);
+        // Consider cleanup logic here, e.g., deleting the auth user
+        throw new Error('Failed to set up your organization. Please contact support.');
+      }
 
-        console.log('Profile creation result:', { profileData, profileError })
+      console.log('Registration successful - user, org, and profile created');
         
-        if (profileError) {
-          console.error('Profile creation failed:', profileError)
-          throw profileError
-        }
-
-        console.log('Registration successful - user and profile created')
-        
-        // Check if user needs email confirmation
-        if (!authData.session) {
-          return { 
-            data: { 
-              user: authData.user, 
-              organization: orgData,
-              needsConfirmation: true,
-              message: 'Account created! Please check your email to confirm your account before signing in.'
-            }, 
-            error: null 
-          }
-        }
-
-        return { data: { user: authData.user, organization: orgData }, error: null }
-        
-      } catch (dbError) {
-        console.error('Database operations failed:', dbError)
-        // If profile creation fails, still return success for auth but with warning
+      // Check if user needs email confirmation
+      if (!authData.session) {
         return { 
           data: { 
             user: authData.user,
-            warning: 'Account created but profile setup incomplete. Please contact support.'
+            ...creationData,
+            needsConfirmation: true,
+            message: 'Account created! Please check your email to confirm your account before signing in.'
           }, 
           error: null 
-        }
+        };
       }
+
+      return { data: { user: authData.user, ...creationData }, error: null };
     } catch (error) {
       console.error('Registration failed:', error)
       return { data: null, error }
