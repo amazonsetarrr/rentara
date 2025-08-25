@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint . --config config/eslint.config.js",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test": "vitest --config config/vitest.config.js",
+    "test:ui": "vitest --ui --config config/vitest.config.js",
+    "test:coverage": "vitest --coverage --config config/vitest.config.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.54.0",
