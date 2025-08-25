@@ -8,6 +8,7 @@ import Spinner from '../components/ui/Spinner'
 import Select from '../components/ui/Select'
 import Input from '../components/ui/Input'
 import RecordPaymentModal from '../components/modals/RecordPaymentModal'
+import AddPaymentModal from '../components/modals/AddPaymentModal'
 import { formatCurrency } from '../utils/currency'
 
 const PAYMENT_STATUS_OPTIONS = [
@@ -33,6 +34,7 @@ export default function PaymentsPage() {
     isOpen: false,
     payment: null
   })
+  const [addPaymentModal, setAddPaymentModal] = useState(false)
 
   useEffect(() => {
     loadPaymentsData()
@@ -90,6 +92,19 @@ export default function PaymentsPage() {
 
   const handlePaymentRecorded = () => {
     // Refresh payments data after recording payment
+    loadPaymentsData()
+  }
+
+  const handleAddPayment = () => {
+    setAddPaymentModal(true)
+  }
+
+  const handleCloseAddPaymentModal = () => {
+    setAddPaymentModal(false)
+  }
+
+  const handlePaymentCreated = () => {
+    // Refresh payments data after creating payment
     loadPaymentsData()
   }
 
@@ -214,7 +229,7 @@ export default function PaymentsPage() {
         </div>
         <div className="flex space-x-3">
           <Button variant="outline">Generate Rent</Button>
-          <Button>Add Payment</Button>
+          <Button onClick={handleAddPayment}>Add Payment</Button>
         </div>
       </div>
 
@@ -353,6 +368,13 @@ export default function PaymentsPage() {
         onClose={handleCloseRecordPaymentModal}
         payment={recordPaymentModal.payment}
         onPaymentRecorded={handlePaymentRecorded}
+      />
+
+      {/* Add Payment Modal */}
+      <AddPaymentModal
+        isOpen={addPaymentModal}
+        onClose={handleCloseAddPaymentModal}
+        onPaymentCreated={handlePaymentCreated}
       />
     </div>
   )
