@@ -29,7 +29,8 @@
       "Bash(gh pr create:*)",
       "Bash(winget install:*)",
       "Bash(choco install:*)",
-      "Bash(gh:*)"
+      "Bash(gh:*)",
+      "Bash(tree:*)"
     ],
     "deny": []
   }
