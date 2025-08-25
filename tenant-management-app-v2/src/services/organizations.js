@@ -70,35 +70,47 @@ export const organizationsService = {
 
     if (!profile) return { data: null, error: 'Profile not found' }
 
-    // Get counts for properties, units, and tenants
+    // Fetch all data to perform manual counts, avoiding potential RLS issues with .count()
     const [propertiesResult, unitsResult, tenantsResult] = await Promise.all([
       supabase
         .from('properties')
-        .select('id', { count: 'exact' })
+        .select('id')
         .eq('organization_id', profile.organization_id),
       supabase
         .from('units')
-        .select('id, status', { count: 'exact' })
+        .select('id, status')
         .eq('organization_id', profile.organization_id),
       supabase
         .from('tenants')
-        .select('id, status', { count: 'exact' })
+        .select('id')
         .eq('organization_id', profile.organization_id)
         .eq('status', 'active')
-    ])
+    ]);
 
-    const stats = {
-      total_properties: propertiesResult.count || 0,
-      total_units: unitsResult.count || 0,
-      occupied_units: unitsResult.data?.filter(unit => unit.status === 'occupied').length || 0,
-      vacant_units: unitsResult.data?.filter(unit => unit.status === 'vacant').length || 0,
-      maintenance_units: unitsResult.data?.filter(unit => unit.status === 'maintenance').length || 0,
-      active_tenants: tenantsResult.count || 0
+    if (propertiesResult.error || unitsResult.error || tenantsResult.error) {
+      console.error('Error fetching stats:',
+        propertiesResult.error,
+        unitsResult.error,
+        tenantsResult.error
+      );
+      return { data: null, error: 'Failed to fetch all stats' };
     }
 
-    stats.occupancy_rate = stats.total_units > 0 
-      ? Math.round((stats.occupied_units / stats.total_units) * 100) 
-      : 0
+    const total_properties = propertiesResult.data?.length || 0;
+    const units = unitsResult.data || [];
+    const total_units = units.length;
+    const occupied_units = units.filter(unit => unit.status === 'occupied').length;
+    const active_tenants = tenantsResult.data?.length || 0;
+
+    const stats = {
+      total_properties,
+      total_units,
+      occupied_units,
+      active_tenants,
+      occupancy_rate: total_units > 0
+        ? Math.round((occupied_units / total_units) * 100)
+        : 0
+    };
 
     return { data: stats, error: null }
   }
