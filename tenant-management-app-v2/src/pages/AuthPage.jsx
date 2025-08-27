@@ -1,11 +1,42 @@
 import { useState } from "react"
 import Button from "../components/ui/Button"
 import Input from "../components/ui/Input"
+import { authService } from '../services/auth'
+import { useAuthStore } from '../stores/authStore'
 
 export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const { checkAuth } = useAuthStore()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    const { error } = await authService.signIn(formData.email, formData.password)
+    
+    if (error) {
+      setError(error.message)
+    } else {
+      await checkAuth()
+    }
+    
+    setLoading(false)
+  }
+
+  const handleChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
@@ -95,15 +126,32 @@ export default function AuthPage() {
                 <p className="text-gray-600">Sign in to your account to continue</p>
               </div>
 
-              <form className="space-y-5">
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-md">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-700">{error}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
                   <Input
                     label="Email address"
                     id="email"
                     type="email"
+                    name="email"
                     placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
                     className="h-11"
                   />
                 </div>
@@ -114,9 +162,11 @@ export default function AuthPage() {
                       label="Password"
                       id="password"
                       type={showPassword ? "text" : "password"}
+                      name="password"
                       placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
                       className="h-11 pr-11"
                     />
                     <button
@@ -155,9 +205,10 @@ export default function AuthPage() {
 
                 <Button
                   type="submit"
+                  loading={loading}
                   className="w-full h-11 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium"
                 >
-                  Sign In
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </form>
 
