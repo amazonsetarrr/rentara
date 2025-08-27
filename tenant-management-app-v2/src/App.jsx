@@ -16,6 +16,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import LogMonitor from './components/debug/LogMonitor'
 import logger from './services/logger'
 import { useLogger } from './hooks/useLogger'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 function App() {
   const { user, loading, checkAuth } = useAuthStore()
@@ -155,6 +156,7 @@ function App() {
           </button>
         </div>
       )}
+      <SpeedInsights />
     </Router>
     </ErrorBoundary>
   )
