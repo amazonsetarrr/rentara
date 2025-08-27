@@ -30,7 +30,8 @@
       "Bash(winget install:*)",
       "Bash(choco install:*)",
       "Bash(gh:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
