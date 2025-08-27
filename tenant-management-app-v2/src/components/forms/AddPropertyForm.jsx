@@ -3,14 +3,7 @@ import { propertiesService } from '../../services/properties'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import Button from '../ui/Button'
-
-const PROPERTY_TYPES = [
-  { value: 'apartment', label: 'Apartment Complex' },
-  { value: 'house', label: 'Single Family House' },
-  { value: 'duplex', label: 'Duplex' },
-  { value: 'commercial', label: 'Commercial Building' },
-  { value: 'condo', label: 'Condominium' }
-]
+import { PROPERTY_TYPES } from '../../utils/constants'
 
 export default function AddPropertyForm({ onSuccess, onCancel }) {
   const [formData, setFormData] = useState({
