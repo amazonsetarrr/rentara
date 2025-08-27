@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { Analytics } from '@vercel/analytics/react';
 import { useAuthStore } from './stores/authStore'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import Layout from './components/layout/Layout'
@@ -155,6 +156,7 @@ function App() {
           </button>
         </div>
       )}
+      <Analytics />
     </Router>
     </ErrorBoundary>
   )
