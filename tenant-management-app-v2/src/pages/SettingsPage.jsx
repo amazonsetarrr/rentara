@@ -16,7 +16,8 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState({
     profile: false,
     email: false,
-    password: false
+    password: false,
+    organization: false
   })
   const [errors, setErrors] = useState({})
   const [success, setSuccess] = useState({})
@@ -38,6 +39,11 @@ export default function SettingsPage() {
     new_password: '',
     confirm_password: ''
   })
+  
+  // Organization form state
+  const [organizationForm, setOrganizationForm] = useState({
+    name: ''
+  })
 
   useEffect(() => {
     loadUserProfile()
@@ -58,6 +64,9 @@ export default function SettingsPage() {
       })
       setProfileForm({
         full_name: data.full_name || ''
+      })
+      setOrganizationForm({
+        name: data.organizations?.name || ''
       })
     } catch (error) {
       console.error('Error loading profile:', error)
@@ -180,6 +189,33 @@ export default function SettingsPage() {
     }
   }
 
+  const handleUpdateOrganization = async (e) => {
+    e.preventDefault()
+    setIsLoading(prev => ({ ...prev, organization: true }))
+    setErrors({})
+    setSuccess({})
+    
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ name: organizationForm.name })
+        .eq('id', profile.organization.id)
+      
+      if (error) throw error
+      
+      setProfile(prev => ({
+        ...prev,
+        organization: { ...prev.organization, name: organizationForm.name }
+      }))
+      setSuccess({ organization: 'Organization name updated successfully' })
+    } catch (error) {
+      console.error('Error updating organization:', error)
+      setErrors({ organization: 'Failed to update organization name. Please try again.' })
+    } finally {
+      setIsLoading(prev => ({ ...prev, organization: false }))
+    }
+  }
+
   if (isLoading.profile && !profile.email) {
     return (
       <div className="p-6">
@@ -281,6 +317,49 @@ export default function SettingsPage() {
             </form>
           </CardContent>
         </Card>
+
+        {/* Update Organization Name */}
+        {profile.organization && (
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold text-gray-900">Organization Settings</h2>
+              <p className="text-sm text-gray-600 mt-1">Update your organization information</p>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleUpdateOrganization} className="space-y-4">
+                <Input
+                  label="Organization Name"
+                  value={organizationForm.name}
+                  onChange={(e) => setOrganizationForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter organization name"
+                  required
+                />
+                
+                {errors.organization && (
+                  <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">
+                    {errors.organization}
+                  </div>
+                )}
+                
+                {success.organization && (
+                  <div className="text-green-600 text-sm bg-green-50 p-3 rounded-md">
+                    {success.organization}
+                  </div>
+                )}
+                
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    loading={isLoading.organization}
+                    disabled={!organizationForm.name || organizationForm.name === profile.organization?.name}
+                  >
+                    Update Organization
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Update Email */}
         <Card>
