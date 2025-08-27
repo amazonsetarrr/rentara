@@ -10,6 +10,7 @@ import UnitsPage from './pages/UnitsPage'
 import TenantsPage from './pages/TenantsPage'
 import PaymentsPage from './pages/PaymentsPage'
 import ReportsPage from './pages/ReportsPage'
+import SettingsPage from './pages/SettingsPage'
 import Spinner from './components/ui/Spinner'
 import SystemOwnerApp from './SystemOwnerApp'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -125,10 +126,7 @@ function App() {
                 path="/settings" 
                 element={
                   <ProtectedRoute>
-                    <div className="text-center py-12">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">Settings</h2>
-                      <p className="text-gray-600">Coming soon...</p>
-                    </div>
+                    <SettingsPage />
                   </ProtectedRoute>
                 } 
               />
