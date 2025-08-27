@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { propertiesService } from '../../services/properties'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import Button from '../ui/Button'
+import { useMalaysiaStateCity } from '../../hooks/useMalaysiaStateCity'
 import { PROPERTY_TYPES } from '../../utils/constants'
 
 export default function AddPropertyForm({ onSuccess, onCancel }) {
@@ -10,7 +11,6 @@ export default function AddPropertyForm({ onSuccess, onCancel }) {
     name: '',
     address: '',
     city: '',
-    state: '',
     zip_code: '',
     property_type: '',
     total_units: 0
@@ -18,15 +18,40 @@ export default function AddPropertyForm({ onSuccess, onCancel }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const {
+    states,
+    cities,
+    selectedState,
+    loadingStates,
+    loadingCities,
+    error: apiError,
+    handleStateChange
+  } = useMalaysiaStateCity()
+
+  useEffect(() => {
+    // Reset city when state changes
+    setFormData(prev => ({ ...prev, city: '' }))
+  }, [selectedState])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    const { data, error } = await propertiesService.createProperty({
+    const submissionData = {
       ...formData,
-      total_units: parseInt(formData.total_units) || 0
-    })
+      state: selectedState,
+      total_units: parseInt(formData.total_units, 10) || 0
+    }
+
+    // Basic validation
+    if (!submissionData.state || !submissionData.city) {
+      setError("Please select both a state and a city.")
+      setLoading(false)
+      return
+    }
+
+    const { data, error } = await propertiesService.createProperty(submissionData)
     
     if (error) {
       setError(error.message)
@@ -44,11 +69,15 @@ export default function AddPropertyForm({ onSuccess, onCancel }) {
     }))
   }
 
+  const handleStateSelectChange = (e) => {
+    handleStateChange(e.target.value)
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
+      {(error || apiError) && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-red-600">{error || apiError}</p>
         </div>
       )}
 
@@ -75,22 +104,26 @@ export default function AddPropertyForm({ onSuccess, onCancel }) {
           />
         </div>
 
-        <Input
+        <Select
+          label="State"
+          name="state"
+          value={selectedState}
+          onChange={handleStateSelectChange}
+          options={states.map(s => ({ value: s, label: s }))}
+          required
+          placeholder={loadingStates ? "Loading states..." : "Select a state"}
+          disabled={loadingStates}
+        />
+
+        <Select
           label="City"
           name="city"
           value={formData.city}
           onChange={handleChange}
+          options={cities.map(c => ({ value: c, label: c }))}
           required
-          placeholder="e.g., San Francisco"
-        />
-
-        <Input
-          label="State"
-          name="state"
-          value={formData.state}
-          onChange={handleChange}
-          required
-          placeholder="e.g., CA"
+          placeholder={loadingCities ? "Loading cities..." : "Select a city"}
+          disabled={!selectedState || loadingCities || cities.length === 0}
         />
 
         <Input

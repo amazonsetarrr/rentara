@@ -32,9 +32,14 @@ export const LEASE_STATUSES = {
 }
 
 export const PROPERTY_TYPES = [
-  { value: 'Terrace House', label: 'Terrace House' },
-  { value: 'Apartment/Flat', label: 'Apartment/Flat' },
-  { value: 'Condominium/Serviced Residence', label: 'Condominium/Serviced Residence' },
-  { value: 'Semi-Detached House (Semi-D)', label: 'Semi-Detached House (Semi-D)' },
-  { value: 'Bungalow/Detached House', label: 'Bungalow/Detached House' }
+  { value: 'apartment', label: 'Apartment Complex' },
+  { value: 'house', label: 'Single Family House' },
+  { value: 'duplex', label: 'Duplex' },
+  { value: 'commercial', label: 'Commercial Building' },
+  { value: 'condo', label: 'Condominium' },
+  { value: 'terrace', label: 'Terrace House' },
+  { value: 'semi-detached', label: 'Semi-Detached House' },
+  { value: 'bungalow', label: 'Bungalow/Detached House' },
+  { value: 'serviced-residence', label: 'Serviced Residence' },
+  { value: 'studio', label: 'Studio Apartment' }
 ]

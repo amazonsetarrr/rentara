@@ -1,0 +1,241 @@
+{
+  "states": [
+    {
+      "name": "Johor",
+      "cities": [
+        "Batu Pahat",
+        "Iskandar Puteri",
+        "Johor Bahru",
+        "Kluang",
+        "Kota Tinggi",
+        "Kulai",
+        "Mersing",
+        "Muar",
+        "Pontian",
+        "Segamat",
+        "Skudai",
+        "Ulu Tiram"
+      ]
+    },
+    {
+      "name": "Kedah",
+      "cities": [
+        "Alor Setar",
+        "Baling",
+        "Bandar Baharu",
+        "Kulim",
+        "Kuala Kedah",
+        "Langkawi",
+        "Pendang",
+        "Pokok Sena",
+        "Sik",
+        "Sungai Petani",
+        "Yan"
+      ]
+    },
+    {
+      "name": "Kelantan",
+      "cities": [
+        "Bachok",
+        "Gua Musang",
+        "Jeli",
+        "Kota Bharu",
+        "Kuala Krai",
+        "Machang",
+        "Pasir Mas",
+        "Pasir Puteh",
+        "Tanah Merah",
+        "Tumpat",
+        "Wakaf Bharu"
+      ]
+    },
+    {
+      "name": "Kuala Lumpur",
+      "cities": [
+        "Ampang",
+        "Bangsar",
+        "Bukit Bintang",
+        "Cheras",
+        "City Centre",
+        "Damansara",
+        "Kepong",
+        "Kenny Hills",
+        "KL Sentral",
+        "Mont Kiara",
+        "Sentul",
+        "Setapak",
+        "Sri Hartamas",
+        "Titiwangsa",
+        "Wangsa Maju"
+      ]
+    },
+    {
+      "name": "Labuan",
+      "cities": [
+        "Labuan"
+      ]
+    },
+    {
+      "name": "Malacca",
+      "cities": [
+        "Alor Gajah",
+        "Jasin",
+        "Malacca City",
+        "Masjid Tanah"
+      ]
+    },
+    {
+      "name": "Negeri Sembilan",
+      "cities": [
+        "Bahau",
+        "Gemenceh",
+        "Gemas",
+        "Jelebu",
+        "Jempol",
+        "Kuala Pilah",
+        "Mantin",
+        "Port Dickson",
+        "Rembau",
+        "Seremban",
+        "Tampin"
+      ]
+    },
+    {
+      "name": "Pahang",
+      "cities": [
+        "Bentong",
+        "Bera",
+        "Cameron Highlands",
+        "Jerantut",
+        "Kuala Lipis",
+        "Kuantan",
+        "Maran",
+        "Pekan",
+        "Raub",
+        "Rompin",
+        "Temerloh"
+      ]
+    },
+    {
+      "name": "Penang",
+      "cities": [
+        "Bayan Lepas",
+        "Bukit Mertajam",
+        "George Town",
+        "Jelutong",
+        "Kepala Batas",
+        "Nibong Tebal",
+        "Perai",
+        "Permatang Pauh",
+        "Seberang Jaya",
+        "Seberang Perai",
+        "Tanjung Bungah"
+      ]
+    },
+    {
+      "name": "Perak",
+      "cities": [
+        "Bagan Serai",
+        "Batu Gajah",
+        "Gopeng",
+        "Ipoh",
+        "Kampar",
+        "Kuala Kangsar",
+        "Lumut",
+        "Manjung",
+        "Parit Buntar",
+        "Seri Iskandar",
+        "Sitiawan",
+        "Taiping",
+        "Tanjung Malim",
+        "Teluk Intan"
+      ]
+    },
+    {
+      "name": "Perlis",
+      "cities": [
+        "Arau",
+        "Kangar",
+        "Kuala Perlis",
+        "Padang Besar"
+      ]
+    },
+    {
+      "name": "Putrajaya",
+      "cities": [
+        "Putrajaya"
+      ]
+    },
+    {
+      "name": "Sabah",
+      "cities": [
+        "Beaufort",
+        "Beluran",
+        "Kota Belud",
+        "Kota Kinabalu",
+        "Kota Marudu",
+        "Kudat",
+        "Kunak",
+        "Lahad Datu",
+        "Penampang",
+        "Ranau",
+        "Sandakan",
+        "Semporna",
+        "Tawau",
+        "Tuaran"
+      ]
+    },
+    {
+      "name": "Sarawak",
+      "cities": [
+        "Bintulu",
+        "Kapit",
+        "Kuching",
+        "Limbang",
+        "Marudi",
+        "Miri",
+        "Mukah",
+        "Samarahan",
+        "Sibu",
+        "Sri Aman"
+      ]
+    },
+    {
+      "name": "Selangor",
+      "cities": [
+        "Ampang",
+        "Bandar Sunway",
+        "Banting",
+        "Cyberjaya",
+        "Gombak",
+        "Hulu Langat",
+        "Hulu Selangor",
+        "Kajang",
+        "Klang",
+        "Kuala Langat",
+        "Kuala Selangor",
+        "Petaling Jaya",
+        "Puchong",
+        "Rawang",
+        "Sabak Bernam",
+        "Sepang",
+        "Shah Alam",
+        "Subang Jaya",
+        "Sungai Buloh"
+      ]
+    },
+    {
+      "name": "Terengganu",
+      "cities": [
+        "Besut",
+        "Dungun",
+        "Hulu Terengganu",
+        "Kemaman",
+        "Kuala Nerus",
+        "Kuala Terengganu",
+        "Marang",
+        "Setiu"
+      ]
+    }
+  ]
+}
