@@ -105,7 +105,7 @@ export default function LoginForm({ onSwitchToSignup }) {
             <div className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">New to RentaraAI?</span>
+            <span className="px-2 bg-white text-gray-500">New to Rentara?</span>
           </div>
         </div>
         

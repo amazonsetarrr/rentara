@@ -52,7 +52,7 @@ export default function Sidebar({ isOpen, onClose }) {
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">RentaraAI</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Rentara</h2>
           
           {/* Mobile close button */}
           <button
