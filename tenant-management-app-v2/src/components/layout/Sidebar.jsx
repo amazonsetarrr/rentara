@@ -88,7 +88,7 @@ export default function Sidebar({ isOpen, onClose }) {
             </div>
             <h2 className="text-lg font-semibold text-gray-900">Rentara</h2>
           </div>
-          
+
           {/* Mobile close button */}
           <button
             onClick={onClose}
