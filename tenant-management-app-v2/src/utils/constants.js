@@ -30,3 +30,11 @@ export const LEASE_STATUSES = {
   COMPLETED: 'completed',
   TERMINATED: 'terminated'
 }
+
+export const PROPERTY_TYPES = [
+  { value: 'Terrace House', label: 'Terrace House' },
+  { value: 'Apartment/Flat', label: 'Apartment/Flat' },
+  { value: 'Condominium/Serviced Residence', label: 'Condominium/Serviced Residence' },
+  { value: 'Semi-Detached House (Semi-D)', label: 'Semi-Detached House (Semi-D)' },
+  { value: 'Bungalow/Detached House', label: 'Bungalow/Detached House' }
+]
