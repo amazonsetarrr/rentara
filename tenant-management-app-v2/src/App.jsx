@@ -20,7 +20,7 @@ import { useLogger } from './hooks/useLogger'
 
 function App() {
   const { user, loading, checkAuth } = useAuthStore()
-  const { logPageView, logError } = useLogger()
+  const { logPageView: _logPageView, logError: _logError } = useLogger()
   const [showLogMonitor, setShowLogMonitor] = useState(false)
 
   useEffect(() => {
@@ -145,7 +145,7 @@ function App() {
       />
       
       {/* Debug Info in Development */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <div className="fixed bottom-4 right-4 z-40">
           <button
             onClick={() => setShowLogMonitor(true)}

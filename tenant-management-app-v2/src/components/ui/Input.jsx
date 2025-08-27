@@ -1,18 +1,28 @@
+import { useId } from 'react';
+
 export default function Input({
   label,
   error,
   type = 'text',
   className = '',
+  id,
   ...props
 }) {
+  const generatedId = useId();
+  const inputId = id || generatedId;
+
   return (
     <div>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label 
+          htmlFor={inputId}
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           {label}
         </label>
       )}
       <input
+        id={inputId}
         type={type}
         className={`
           w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm

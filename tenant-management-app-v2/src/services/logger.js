@@ -5,7 +5,7 @@ class Logger {
   constructor() {
     this.logs = []
     this.maxLogs = 1000 // Keep last 1000 logs in memory
-    this.logLevel = process.env.NODE_ENV === 'production' ? 'error' : 'debug'
+    this.logLevel = import.meta.env.PROD ? 'error' : 'debug'
     this.enableLocalStorage = true
     this.enableConsole = true
     

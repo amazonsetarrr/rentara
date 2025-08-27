@@ -10,28 +10,27 @@ vi.mock('../../../services/properties', () => ({
   },
 }))
 
-// Mock fetch
-const mockFetch = vi.spyOn(global, 'fetch')
+// Mock the Malaysian data import
+vi.mock('../../../data/malaysianStatesCities.json', () => ({
+  default: {
+    states: [
+      {
+        name: 'Johor',
+        cities: ['Johor Bahru', 'Muar', 'Batu Pahat']
+      },
+      {
+        name: 'Selangor', 
+        cities: ['Petaling Jaya', 'Shah Alam', 'Subang Jaya']
+      }
+    ]
+  }
+}))
 
 describe('AddPropertyForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Mock successful states response by default
-    mockFetch.mockImplementation((url) => {
-      if (url.toString().endsWith('/states')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve([{ name: 'Johor' }, { name: 'Selangor' }]),
-        })
-      }
-      if (url.toString().includes('/states/Johor')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve([{ name: 'Johor Bahru' }, { name: 'Muar' }]),
-        })
-      }
-      return Promise.resolve({ ok: false, json: () => Promise.resolve({ message: 'Not Found' }) })
-    })
+    // Clear localStorage before each test
+    localStorage.clear()
   })
 
   it('renders the form and allows property creation with state and city dropdowns', async () => {
@@ -86,46 +85,50 @@ describe('AddPropertyForm', () => {
     })
   })
 
-  it('shows an error message if fetching states fails', async () => {
-    // Mock failed states response
-    mockFetch.mockImplementation((url) => {
-      if (url.toString().endsWith('/states')) {
-        return Promise.resolve({ ok: false, status: 500 })
-      }
-      return Promise.resolve({ ok: false, json: () => Promise.resolve({ message: 'Not Found' }) })
-    })
-
+  it('loads states from local data successfully', async () => {
     render(<AddPropertyForm />)
 
+    // Wait for states to load from local data
     await waitFor(() => {
-      expect(screen.getByText('Failed to fetch states. Please try again later.')).toBeInTheDocument()
+      expect(screen.getByText('Johor')).toBeInTheDocument()
+      expect(screen.getByText('Selangor')).toBeInTheDocument()
     })
   })
 
-  it('shows an error message if fetching cities fails', async () => {
-    // Mock failed cities response
-    mockFetch.mockImplementation((url) => {
-      if (url.toString().endsWith('/states')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve([{ name: 'Johor' }]),
-        })
-      }
-      if (url.toString().includes('/states/Johor')) {
-        return Promise.resolve({ ok: false, status: 500 })
-      }
-      return Promise.resolve({ ok: false, json: () => Promise.resolve({ message: 'Not Found' }) })
-    })
-
+  it('loads cities when a state is selected', async () => {
     render(<AddPropertyForm />)
 
-    // Wait for states to load and select one
+    // Wait for states to load
     await waitFor(() => {
-      fireEvent.change(screen.getByLabelText('State'), { target: { value: 'Johor' } })
+      expect(screen.getByText('Johor')).toBeInTheDocument()
     })
 
+    // Select a state
+    fireEvent.change(screen.getByLabelText('State'), { target: { value: 'Johor' } })
+
+    // Wait for cities to load
     await waitFor(() => {
-      expect(screen.getByText('Failed to fetch cities for the selected state.')).toBeInTheDocument()
+      expect(screen.getByText('Johor Bahru')).toBeInTheDocument()
+      expect(screen.getByText('Muar')).toBeInTheDocument()
+      expect(screen.getByText('Batu Pahat')).toBeInTheDocument()
+    })
+  })
+
+  it('shows validation error when state and city are not selected', async () => {
+    const onSuccess = vi.fn()
+    render(<AddPropertyForm onSuccess={onSuccess} />)
+
+    // Fill out other required fields
+    fireEvent.change(screen.getByLabelText('Property Name'), { target: { value: 'Test Property' } })
+    fireEvent.change(screen.getByLabelText('Street Address'), { target: { value: '123 Test St' } })
+    fireEvent.change(screen.getByLabelText('ZIP Code'), { target: { value: '12345' } })
+    fireEvent.change(screen.getByLabelText('Property Type'), { target: { value: 'apartment' } })
+
+    // Submit without selecting state and city
+    fireEvent.click(screen.getByRole('button', { name: 'Create Property' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Please select both a state and a city.')).toBeInTheDocument()
     })
   })
 })

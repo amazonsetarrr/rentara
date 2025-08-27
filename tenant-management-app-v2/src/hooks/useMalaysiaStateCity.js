@@ -1,21 +1,50 @@
 import { useState, useEffect, useCallback } from 'react';
+import malaysianData from '../data/malaysianStatesCities.json';
 
-const API_BASE_URL = 'https://malaysia-states-api.herokuapp.com';
+/**
+ * @typedef {Object} StateData
+ * @property {string} name - The name of the state
+ * @property {string[]} cities - Array of city names in the state
+ */
 
-// Helper to fetch data from API with error handling
-const fetchFromAPI = async (endpoint) => {
+/**
+ * @typedef {Object} UseMalaysiaStateCityReturn
+ * @property {string[]} states - Array of state names
+ * @property {string[]} cities - Array of city names for selected state
+ * @property {string} selectedState - Currently selected state
+ * @property {boolean} loadingStates - Whether states are loading
+ * @property {boolean} loadingCities - Whether cities are loading
+ * @property {string|null} error - Error message if any
+ * @property {function} handleStateChange - Function to handle state selection
+ */
+
+// Helper to get local data with simulated async behavior for consistency
+const getLocalData = async (type, stateName = null) => {
+  // Simulate network delay for consistent UX, but skip in test environment
+  const isTestEnv = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test';
+  if (!isTestEnv) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
   try {
-    const response = await fetch(`${API_BASE_URL}/${endpoint}`);
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+    if (type === 'states') {
+      return malaysianData.states.map(state => state.name);
+    } else if (type === 'cities' && stateName) {
+      const state = malaysianData.states.find(s => s.name === stateName);
+      return state ? state.cities : [];
     }
-    return await response.json();
+    return [];
   } catch (error) {
-    console.error(`Error fetching ${endpoint}:`, error);
-    throw error;
+    console.error(`Error getting local data for ${type}:`, error);
+    throw new Error(`Failed to load ${type} data`);
   }
 };
 
+/**
+ * Custom hook for managing Malaysian states and cities data
+ * Provides local data with caching and proper loading states
+ * @returns {UseMalaysiaStateCityReturn} Object containing states, cities, and handlers
+ */
 export const useMalaysiaStateCity = () => {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -24,24 +53,36 @@ export const useMalaysiaStateCity = () => {
   const [loadingCities, setLoadingCities] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch states on mount
+  // Load states on mount
   useEffect(() => {
     const getStates = async () => {
       setLoadingStates(true);
       setError(null);
       try {
-        // Try to get from cache first
+        // Try to get from cache first for performance
         const cachedStates = localStorage.getItem('malaysiaStates');
         if (cachedStates) {
-          setStates(JSON.parse(cachedStates));
-        } else {
-          const data = await fetchFromAPI('states');
-          const stateNames = data.map(s => s.name);
-          localStorage.setItem('malaysiaStates', JSON.stringify(stateNames));
-          setStates(stateNames);
+          const parsedStates = JSON.parse(cachedStates);
+          setStates(parsedStates);
+          setLoadingStates(false);
+          return;
         }
+
+        // Get from local data and cache it
+        const stateNames = await getLocalData('states');
+        localStorage.setItem('malaysiaStates', JSON.stringify(stateNames));
+        setStates(stateNames);
       } catch (e) {
-        setError('Failed to fetch states. Please try again later.');
+        console.error('Error loading states:', e);
+        setError('Failed to load states. Please refresh the page.');
+        // Fallback to direct data access if local function fails
+        try {
+          const fallbackStates = malaysianData.states.map(state => state.name);
+          setStates(fallbackStates);
+          setError(null);
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+        }
       } finally {
         setLoadingStates(false);
       }
@@ -49,7 +90,7 @@ export const useMalaysiaStateCity = () => {
     getStates();
   }, []);
 
-  // Fetch cities when selectedState changes
+  // Load cities when selectedState changes
   useEffect(() => {
     if (!selectedState) {
       setCities([]);
@@ -60,12 +101,33 @@ export const useMalaysiaStateCity = () => {
       setLoadingCities(true);
       setError(null);
       try {
-        const data = await fetchFromAPI(`states/${encodeURIComponent(selectedState)}`);
-        const cityNames = data.map(c => c.name);
+        // Try cache first
+        const cacheKey = `malaysiaCities_${selectedState}`;
+        const cachedCities = localStorage.getItem(cacheKey);
+        if (cachedCities) {
+          const parsedCities = JSON.parse(cachedCities);
+          setCities(parsedCities);
+          setLoadingCities(false);
+          return;
+        }
+
+        // Get from local data and cache it
+        const cityNames = await getLocalData('cities', selectedState);
+        localStorage.setItem(cacheKey, JSON.stringify(cityNames));
         setCities(cityNames);
       } catch (e) {
-        setError('Failed to fetch cities for the selected state.');
-        setCities([]);
+        console.error('Error loading cities:', e);
+        setError('Failed to load cities for the selected state.');
+        // Fallback to direct data access
+        try {
+          const state = malaysianData.states.find(s => s.name === selectedState);
+          const fallbackCities = state ? state.cities : [];
+          setCities(fallbackCities);
+          setError(null);
+        } catch (fallbackError) {
+          console.error('City fallback also failed:', fallbackError);
+          setCities([]);
+        }
       } finally {
         setLoadingCities(false);
       }
@@ -74,8 +136,37 @@ export const useMalaysiaStateCity = () => {
     getCities();
   }, [selectedState]);
 
+  /**
+   * Handles state selection change
+   * @param {string} state - The selected state name
+   */
   const handleStateChange = useCallback((state) => {
     setSelectedState(state);
+    // Clear any previous errors when selecting a new state
+    setError(null);
+  }, []);
+
+  /**
+   * Clears the current selection
+   */
+  const clearSelection = useCallback(() => {
+    setSelectedState('');
+    setCities([]);
+    setError(null);
+  }, []);
+
+  /**
+   * Gets cities for a specific state without changing selection
+   * @param {string} stateName - The state name to get cities for
+   * @returns {Promise<string[]>} Array of city names
+   */
+  const getCitiesForState = useCallback(async (stateName) => {
+    try {
+      return await getLocalData('cities', stateName);
+    } catch (error) {
+      console.error('Error getting cities for state:', error);
+      return [];
+    }
   }, []);
 
   return {
@@ -85,6 +176,8 @@ export const useMalaysiaStateCity = () => {
     loadingStates,
     loadingCities,
     error,
-    handleStateChange
+    handleStateChange,
+    clearSelection,
+    getCitiesForState
   };
 };
