@@ -34,7 +34,7 @@ export default function LoginPage() {
                 </div>
                 <h1 className="text-2xl font-bold">Rentara</h1>
               </div>
-              <p className="text-lg text-blue-100 font-medium">Smart Tenant Management System </p>
+              <p className="text-lg text-blue-100 font-medium">Smart Tenant Management System</p>
             </div>
 
             {/* Features */}
