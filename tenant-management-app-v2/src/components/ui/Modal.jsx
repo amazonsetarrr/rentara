@@ -29,6 +29,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
           onClick={onClose}
+          data-testid="modal-backdrop"
         />
         
         {/* Modal */}

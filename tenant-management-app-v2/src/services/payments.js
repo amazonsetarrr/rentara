@@ -330,11 +330,20 @@ export const paymentsService = {
   // Create rent schedule
   async createRentSchedule(scheduleData) {
     try {
+      // Get current user's organization
+      const user = (await supabase.auth.getUser()).data.user
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single()
+
       const { data, error } = await supabase
         .from('rent_schedules')
         .insert([{
           tenant_id: scheduleData.tenant_id,
           unit_id: scheduleData.unit_id,
+          organization_id: profile.organization_id,
           rent_amount: scheduleData.rent_amount,
           due_day: scheduleData.due_day,
           start_date: scheduleData.start_date,
@@ -348,6 +357,20 @@ export const paymentsService = {
           unit:units(unit_number)
         `)
         .single()
+
+      return { data, error }
+    } catch (error) {
+      return { data: null, error }
+    }
+  },
+
+  // Delete rent schedule
+  async deleteRentSchedule(scheduleId) {
+    try {
+      const { data, error } = await supabase
+        .from('rent_schedules')
+        .delete()
+        .eq('id', scheduleId)
 
       return { data, error }
     } catch (error) {
@@ -468,6 +491,20 @@ export const paymentsService = {
       })
 
       return { data: analytics, error: null }
+    } catch (error) {
+      return { data: null, error }
+    }
+  },
+
+  // Delete payment
+  async deletePayment(paymentId) {
+    try {
+      const { data, error } = await supabase
+        .from('payments')
+        .delete()
+        .eq('id', paymentId)
+
+      return { data, error }
     } catch (error) {
       return { data: null, error }
     }
