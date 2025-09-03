@@ -47,12 +47,24 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
-// Mock window.location
+// Mock window.location with more complete implementation
 Object.defineProperty(window, 'location', {
   value: {
     href: 'http://localhost:3000',
+    origin: 'http://localhost:3000',
+    pathname: '/',
+    search: '',
+    hash: '',
     assign: vi.fn(),
-    replace: vi.fn()
+    replace: vi.fn(),
+    reload: vi.fn()
   },
   writable: true
 })
+
+// Mock ResizeObserver
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}))

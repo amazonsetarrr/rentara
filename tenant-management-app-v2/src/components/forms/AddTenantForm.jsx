@@ -44,10 +44,13 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
     if (error) {
       setError('Failed to load vacant units: ' + error.message)
     } else if (data) {
-      setUnits(data.map(u => ({
-        value: u.id,
-        label: `${u.properties.name} - Unit ${u.unit_number} (${u.unit_type})`
-      })))
+      setUnits([
+        { value: '', label: 'No unit assigned (can assign later)' },
+        ...data.map(u => ({
+          value: u.id,
+          label: `${u.properties.name} - Unit ${u.unit_number} (${u.unit_type})`
+        }))
+      ])
     }
     setLoadingUnits(false)
   }
@@ -57,22 +60,31 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
     setLoading(true)
     setError('')
 
-    // Validation
-    if (new Date(formData.lease_start_date) >= new Date(formData.lease_end_date)) {
-      setError('Lease end date must be after start date')
-      setLoading(false)
-      return
+    // Validation - only validate lease dates if both are provided
+    if (formData.lease_start_date && formData.lease_end_date) {
+      if (new Date(formData.lease_start_date) >= new Date(formData.lease_end_date)) {
+        setError('Lease end date must be after start date')
+        setLoading(false)
+        return
+      }
     }
 
-    const { data, error } = await tenantsService.createTenant({
+    // If no unit is assigned, set status to pending instead of active
+    const submissionData = {
       ...formData,
+      // Convert empty unit_id to null
+      unit_id: formData.unit_id || null,
+      // If no unit assigned and status is active, change to pending
+      status: !formData.unit_id && formData.status === 'active' ? 'pending' : formData.status,
       rent_amount: parseFloat(formData.rent_amount) || null,
       deposit_paid: parseFloat(formData.deposit_paid) || null,
       security_deposit: parseFloat(formData.security_deposit) || null,
       lease_start_date: formData.lease_start_date || null,
       lease_end_date: formData.lease_end_date || null,
       move_in_date: formData.move_in_date || null
-    })
+    }
+
+    const { data, error } = await tenantsService.createTenant(submissionData)
     
     if (error) {
       setError(error.message)
@@ -101,15 +113,19 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="md:col-span-2">
           <Select
-            label="Unit"
+            label="Unit (Optional)"
             name="unit_id"
             value={formData.unit_id}
             onChange={handleChange}
             options={units}
-            required
-            placeholder={loadingUnits ? "Loading units..." : "Select a vacant unit"}
+            placeholder={loadingUnits ? "Loading units..." : "Select a unit or leave unassigned"}
             disabled={loadingUnits || !!unitId}
           />
+          {!formData.unit_id && (
+            <p className="text-sm text-gray-500 mt-1">
+              You can assign a unit to this tenant later from the tenants list
+            </p>
+          )}
         </div>
 
         <Input
@@ -166,22 +182,28 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
         />
 
         <Input
-          label="Lease Start Date"
+          label="Lease Start Date (Optional)"
           type="date"
           name="lease_start_date"
           value={formData.lease_start_date}
           onChange={handleChange}
-          required
         />
 
         <Input
-          label="Lease End Date"
+          label="Lease End Date (Optional)"
           type="date"
           name="lease_end_date"
           value={formData.lease_end_date}
           onChange={handleChange}
-          required
         />
+
+        {(!formData.lease_start_date || !formData.lease_end_date) && (
+          <div className="md:col-span-2">
+            <p className="text-sm text-gray-500">
+              💡 Lease dates can be set later when the tenant signs a lease agreement
+            </p>
+          </div>
+        )}
 
         <Input
           label="Monthly Rent (RM)"
