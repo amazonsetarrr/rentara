@@ -8,6 +8,7 @@ import Modal from '../components/ui/Modal'
 import AddPropertyForm from '../components/forms/AddPropertyForm'
 import AddUnitForm from '../components/forms/AddUnitForm'
 import AddTenantForm from '../components/forms/AddTenantForm'
+import SubscriptionDuration from '../components/ui/SubscriptionDuration'
 
 export default function Dashboard() {
   const { profile } = useAuthStore()
@@ -27,7 +28,23 @@ export default function Dashboard() {
     try {
       const { data, error } = await organizationsService.getOrganizationStats()
       if (data) {
-        setStats(data)
+        // Add mock subscription data to test standardized model: Trial=14 days, Monthly=30 days, Annual=1 year
+        const mockSubscriptionInfo = {
+          subscription_status: 'trial',
+          subscription_plan: 'starter',
+          billing_cycle: 'monthly',
+          ends_at: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+          subscription_started_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
+          created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+          days_remaining: 10,
+          total_days: 14, // Standardized 14-day trial
+          progress_percentage: 28.6, // 4/14 days = 28.6%
+          is_expired: false
+        }
+        setStats({
+          ...data,
+          subscription_info: mockSubscriptionInfo
+        })
       } else {
         console.warn('Stats loading failed, using fallback:', error)
         // Use fallback stats when database queries fail
@@ -149,7 +166,7 @@ export default function Dashboard() {
         </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
               <h3 className="text-lg font-semibold">Quick Actions</h3>
@@ -198,22 +215,25 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold">Organization Info</h3>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Organization</p>
                   <p className="text-lg">{profile?.organizations?.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Subscription Plan</p>
-                  <span className="inline-flex px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
-                    {profile?.organizations?.subscription_plan || 'Trial'}
-                  </span>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">Your Role</p>
                   <p className="text-lg capitalize">{profile?.role}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-semibold">Subscription Status</h3>
+            </CardHeader>
+            <CardContent>
+              <SubscriptionDuration subscriptionInfo={stats?.subscription_info} />
             </CardContent>
           </Card>
         </div>

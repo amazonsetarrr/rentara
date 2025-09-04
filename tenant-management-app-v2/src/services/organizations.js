@@ -57,7 +57,29 @@ export const organizationsService = {
     return { data, error }
   },
 
-  // Get organization stats
+  // Get subscription duration info
+  async getSubscriptionDuration() {
+    const user = (await supabase.auth.getUser()).data.user
+    if (!user) return { data: null, error: 'Not authenticated' }
+
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile) return { data: null, error: 'Profile not found' }
+
+    const { data, error } = await supabase
+      .from('organization_subscription_info')
+      .select('*')
+      .eq('id', profile.organization_id)
+      .single()
+
+    return { data, error }
+  },
+
+  // Get organization stats with subscription info
   async getOrganizationStats() {
     const user = (await supabase.auth.getUser()).data.user
     if (!user) return { data: null, error: 'Not authenticated' }
@@ -71,7 +93,7 @@ export const organizationsService = {
     if (!profile) return { data: null, error: 'Profile not found' }
 
     // Fetch all data to perform manual counts, avoiding potential RLS issues with .count()
-    const [propertiesResult, unitsResult, tenantsResult] = await Promise.all([
+    const [propertiesResult, unitsResult, tenantsResult, subscriptionResult] = await Promise.all([
       supabase
         .from('properties')
         .select('id')
@@ -84,7 +106,12 @@ export const organizationsService = {
         .from('tenants')
         .select('id')
         .eq('organization_id', profile.organization_id)
-        .eq('status', 'active')
+        .eq('status', 'active'),
+      supabase
+        .from('organization_subscription_info')
+        .select('*')
+        .eq('id', profile.organization_id)
+        .single()
     ]);
 
     if (propertiesResult.error || unitsResult.error || tenantsResult.error) {
@@ -109,7 +136,8 @@ export const organizationsService = {
       active_tenants,
       occupancy_rate: total_units > 0
         ? Math.round((occupied_units / total_units) * 100)
-        : 0
+        : 0,
+      subscription_info: subscriptionResult.data || null
     };
 
     return { data: stats, error: null }
