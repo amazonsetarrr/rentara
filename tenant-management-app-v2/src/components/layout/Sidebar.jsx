@@ -1,4 +1,6 @@
 import { NavLink } from 'react-router-dom'
+import logoImage from '../../assets/logo.png'
+import iconImage from '../../assets/icon.png'
 
 const navigationItems = [
   {
@@ -81,11 +83,7 @@ export default function Sidebar({ isOpen, onClose }) {
       `}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
+            <img src={iconImage} alt="Rentara" className="w-8 h-8 rounded-lg" />
             <h2 className="text-lg font-semibold text-gray-900">Rentara</h2>
           </div>
 

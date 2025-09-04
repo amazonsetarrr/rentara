@@ -13,10 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mode switching between login and signup forms on auth page
 - Comprehensive form validation for organization signup
 - Integration with existing `authService.signUpWithOrganization()` method
+- **[BRANDING]** Official Rentara logo and branding assets
+  - Added custom Rentara logo (`src/assets/logo.png`) 
+  - Added custom Rentara icon (`src/assets/icon.png`)
+  - Updated browser favicon to use custom Rentara icon
+  - Replaced placeholder icons throughout the application
 
 ### Changed
 - Updated `AuthPage.jsx` to support both login and signup modes
-- Enhanced auth page UX with seamless navigation between forms
+- Enhanced auth page UX with seamless navigation between forms  
+- **[BRANDING]** Updated application branding throughout UI
+  - Replaced generic building icons with custom Rentara icon in sidebar
+  - Updated auth page left panel to display full Rentara logo
+  - Updated mobile logo display with custom Rentara icon
+  - Updated organization creation button icon with Rentara branding
 
 ### Fixed
 - **[MAJOR]** Organization creation button on login/auth page now functional

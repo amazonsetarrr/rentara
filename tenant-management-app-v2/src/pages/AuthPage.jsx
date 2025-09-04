@@ -4,6 +4,8 @@ import Input from "../components/ui/Input"
 import SignupForm from "../components/forms/SignupForm"
 import { authService } from '../services/auth'
 import { useAuthStore } from '../stores/authStore'
+import logoImage from '../assets/logo.png'
+import iconImage from '../assets/icon.png'
 
 export default function AuthPage() {
   const [mode, setMode] = useState('login') // 'login' or 'signup'
@@ -57,14 +59,7 @@ export default function AuthPage() {
           <div className="relative z-10 flex flex-col justify-center px-8 py-12 text-white">
             {/* Logo */}
             <div className="mb-8">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
-                <h1 className="text-2xl font-bold">Rentara</h1>
-              </div>
+              <img src={logoImage} alt="Rentara" className="h-16 mb-3" />
               <p className="text-lg text-blue-100 font-medium">Smart Tenant Management System</p>
             </div>
 
@@ -112,11 +107,7 @@ export default function AuthPage() {
             {/* Mobile Logo */}
             <div className="lg:hidden mb-6 text-center">
               <div className="flex items-center justify-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
+                <img src={iconImage} alt="Rentara" className="w-8 h-8 rounded-xl" />
                 <h1 className="text-xl font-bold text-gray-900">Rentara</h1>
               </div>
               <p className="text-sm text-gray-600">Smart Property Management</p>
@@ -222,9 +213,7 @@ export default function AuthPage() {
                     onClick={() => setMode('signup')}
                     className="w-full h-11 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent flex items-center justify-center"
                   >
-                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
+                    <img src={iconImage} alt="Rentara" className="w-4 h-4 mr-2 rounded" />
                     Create your organization
                   </Button>
                 </div>
