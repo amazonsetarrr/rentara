@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Now properly switches to signup form and handles organization creation
   - Users can now create organizations directly from the auth page
   - Verified with Playwright testing for complete functionality
+- **[UI]** "Create your organization" button alignment and centering
+  - Fixed off-centered icon and text in the organization creation button
+  - Added proper flex alignment classes (`flex items-center justify-center`)
+  - Button content now perfectly centered both horizontally and vertically
 
 ### Technical Details
 - Created `src/components/forms/SignupForm.jsx` with full validation
