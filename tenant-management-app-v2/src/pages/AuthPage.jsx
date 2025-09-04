@@ -1,10 +1,12 @@
 import { useState } from "react"
 import Button from "../components/ui/Button"
 import Input from "../components/ui/Input"
+import SignupForm from "../components/forms/SignupForm"
 import { authService } from '../services/auth'
 import { useAuthStore } from '../stores/authStore'
 
 export default function AuthPage() {
+  const [mode, setMode] = useState('login') // 'login' or 'signup'
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
@@ -104,7 +106,7 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Right Panel - Login Form */}
+        {/* Right Panel - Forms */}
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-sm">
             {/* Mobile Logo */}
@@ -120,111 +122,119 @@ export default function AuthPage() {
               <p className="text-sm text-gray-600">Smart Property Management</p>
             </div>
 
-            <div className="space-y-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h2>
-                <p className="text-gray-600">Sign in to your account to continue</p>
-              </div>
+            {mode === 'login' ? (
+              <div className="space-y-6">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h2>
+                  <p className="text-gray-600">Sign in to your account to continue</p>
+                </div>
 
-              {error && (
-                <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-md">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-red-700">{error}</p>
+                {error && (
+                  <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-md">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-red-700">{error}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                  <Input
-                    label="Email address"
-                    id="email"
-                    type="email"
-                    name="email"
-                    placeholder="your@email.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="h-11"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="relative">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="space-y-2">
                     <Input
-                      label="Password"
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="••••••••"
-                      value={formData.password}
+                      label="Email address"
+                      id="email"
+                      type="email"
+                      name="email"
+                      placeholder="your@email.com"
+                      value={formData.email}
                       onChange={handleChange}
                       required
-                      className="h-11 pr-11"
+                      className="h-11"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? 
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.636 6.636m3.242 3.242L12 12m0 0l2.121 2.121M12 12l2.121-2.121m-2.121 2.121L9.879 14.121M21 12c-1.274-4.057-5.065-7-9.543-7M3 3l18 18" />
-                        </svg> : 
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      }
-                    </button>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <input
-                      id="remember"
-                      type="checkbox"
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
-                      Remember me
-                    </label>
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        label="Password"
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        placeholder="••••••••"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                        className="h-11 pr-11"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? 
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.636 6.636m3.242 3.242L12 12m0 0l2.121 2.121M12 12l2.121-2.121m-2.121 2.121L9.879 14.121M21 12c-1.274-4.057-5.065-7-9.543-7M3 3l18 18" />
+                          </svg> : 
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        }
+                      </button>
+                    </div>
                   </div>
-                  <a href="#" className="text-sm text-blue-600 hover:text-blue-500 font-medium">
-                    Forgot your password?
-                  </a>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <input
+                        id="remember"
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
+                        Remember me
+                      </label>
+                    </div>
+                    <a href="#" className="text-sm text-blue-600 hover:text-blue-500 font-medium">
+                      Forgot your password?
+                    </a>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    loading={loading}
+                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium"
+                  >
+                    {loading ? 'Signing in...' : 'Sign In'}
+                  </Button>
+                </form>
+
+                <div className="mt-6 text-center">
+                  <p className="text-gray-600 mb-3 text-sm">New to Rentara?</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setMode('signup')}
+                    className="w-full h-11 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Create your organization
+                  </Button>
                 </div>
-
-                <Button
-                  type="submit"
-                  loading={loading}
-                  className="w-full h-11 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium"
-                >
-                  {loading ? 'Signing in...' : 'Sign In'}
-                </Button>
-              </form>
-
-              <div className="mt-6 text-center">
-                <p className="text-gray-600 mb-3 text-sm">New to Rentara?</p>
-                <Button
-                  variant="outline"
-                  className="w-full h-11 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  Create your organization
-                </Button>
               </div>
-            </div>
+            ) : (
+              <SignupForm 
+                onBackToLogin={() => setMode('login')}
+                onSuccess={() => setMode('login')}
+              />
+            )}
           </div>
         </div>
       </div>
