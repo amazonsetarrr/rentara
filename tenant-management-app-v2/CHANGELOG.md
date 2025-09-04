@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added custom Rentara icon (`src/assets/icon.png`)
   - Updated browser favicon to use custom Rentara icon
   - Replaced placeholder icons throughout the application
+  - **[UPDATED]** Improved logo design with better contrast and cleaner aesthetics
 
 ### Changed
 - Updated `AuthPage.jsx` to support both login and signup modes
