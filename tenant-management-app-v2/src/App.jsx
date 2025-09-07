@@ -12,7 +12,7 @@ import PaymentsPage from './pages/PaymentsPage'
 import ReportsPage from './pages/ReportsPage'
 import SettingsPage from './pages/SettingsPage'
 import Spinner from './components/ui/Spinner'
-import SystemOwnerApp from './SystemOwnerApp'
+import SuperAdminApp from './SuperAdminApp'
 import ErrorBoundary from './components/ErrorBoundary'
 import LogMonitor from './components/debug/LogMonitor'
 import logger from './services/logger'
@@ -60,7 +60,7 @@ function App() {
       <Router>
         <Routes>
           {/* SuperAdmin Portal Routes */}
-          <Route path="/superadmin/*" element={<SystemOwnerApp />} />
+          <Route path="/superadmin/*" element={<SuperAdminApp />} />
           
           {/* Regular Tenant Portal Routes */}
           <Route path="/*" element={

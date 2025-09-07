@@ -1,15 +1,15 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom'
-import { useSystemOwnerStore } from '../../stores/systemOwnerStore'
+import { useSuperAdminStore } from '../../stores/superAdminStore'
 import Spinner from '../ui/Spinner'
 
-export default function SystemOwnerProtectedRoute({ children }) {
-  const { user, profile, loading } = useSystemOwnerStore()
+export default function SuperAdminProtectedRoute({ children }) {
+  const { user, profile, loading } = useSuperAdminStore()
 
   console.log('🔐 SystemOwnerProtectedRoute render:', { 
     user: !!user, 
     profile: !!profile, 
-    is_system_owner: profile?.is_system_owner, 
+    is_super_admin: profile?.is_super_admin, 
     loading 
   })
 
@@ -27,7 +27,7 @@ export default function SystemOwnerProtectedRoute({ children }) {
     return <Navigate to="/superadmin/auth" replace />
   }
 
-  if (!profile?.is_system_owner) {
+  if (!profile?.is_super_admin) {
     console.log('🔐 SystemOwnerProtectedRoute: User is not system owner, redirecting to auth')
     return <Navigate to="/superadmin/auth" replace />
   }

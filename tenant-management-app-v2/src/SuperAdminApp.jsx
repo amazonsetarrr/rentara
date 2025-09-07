@@ -1,13 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
-import { useSystemOwnerStore } from './stores/systemOwnerStore'
-import SystemOwnerProtectedRoute from './components/auth/SystemOwnerProtectedRoute'
-import SystemOwnerAuth from './pages/SystemOwnerAuth'
-import SystemOwnerDashboard from './pages/SystemOwnerDashboard'
+import { useSuperAdminStore } from './stores/superAdminStore'
+import SuperAdminProtectedRoute from './components/auth/SuperAdminProtectedRoute'
+import SuperAdminAuth from './pages/SuperAdminAuth'
+import SuperAdminDashboard from './pages/SuperAdminDashboard'
 import Spinner from './components/ui/Spinner'
 
-function SystemOwnerApp() {
-  const { user, loading, checkAuth } = useSystemOwnerStore()
+function SuperAdminApp() {
+  const { user, loading, checkAuth } = useSuperAdminStore()
 
   useEffect(() => {
     checkAuth()
@@ -29,51 +29,51 @@ function SystemOwnerApp() {
       />
       <Route 
         path="/auth" 
-        element={user ? <Navigate to="/superadmin/dashboard" replace /> : <SystemOwnerAuth />} 
+        element={user ? <Navigate to="/superadmin/dashboard" replace /> : <SuperAdminAuth />} 
       />
       <Route 
         path="/dashboard" 
         element={
-          <SystemOwnerProtectedRoute>
-            <SystemOwnerDashboard />
-          </SystemOwnerProtectedRoute>
+          <SuperAdminProtectedRoute>
+            <SuperAdminDashboard />
+          </SuperAdminProtectedRoute>
         } 
       />
       <Route 
         path="/organizations" 
         element={
-          <SystemOwnerProtectedRoute>
+          <SuperAdminProtectedRoute>
             <div className="text-center py-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Organization Management</h2>
               <p className="text-gray-600">Advanced organization management coming soon...</p>
             </div>
-          </SystemOwnerProtectedRoute>
+          </SuperAdminProtectedRoute>
         } 
       />
       <Route 
         path="/analytics" 
         element={
-          <SystemOwnerProtectedRoute>
+          <SuperAdminProtectedRoute>
             <div className="text-center py-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">System Analytics</h2>
               <p className="text-gray-600">Detailed analytics dashboard coming soon...</p>
             </div>
-          </SystemOwnerProtectedRoute>
+          </SuperAdminProtectedRoute>
         } 
       />
       <Route 
         path="/settings" 
         element={
-          <SystemOwnerProtectedRoute>
+          <SuperAdminProtectedRoute>
             <div className="text-center py-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">System Settings</h2>
               <p className="text-gray-600">System configuration coming soon...</p>
             </div>
-          </SystemOwnerProtectedRoute>
+          </SuperAdminProtectedRoute>
         } 
       />
     </Routes>
   )
 }
 
-export default SystemOwnerApp
+export default SuperAdminApp

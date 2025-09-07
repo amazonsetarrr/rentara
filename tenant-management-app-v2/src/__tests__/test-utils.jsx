@@ -58,7 +58,7 @@ export const createAppWithoutRouter = () => {
   const ReportsPage = require('../pages/ReportsPage').default
   const SettingsPage = require('../pages/SettingsPage').default
   const Spinner = require('../components/ui/Spinner').default
-  const SystemOwnerApp = require('../SystemOwnerApp').default
+  const SuperAdminApp = require('../SuperAdminApp').default
   const ErrorBoundary = require('../components/ErrorBoundary').default
   
   return function AppRoutes() {
@@ -76,7 +76,7 @@ export const createAppWithoutRouter = () => {
       <ErrorBoundary>
         <Routes>
           {/* SuperAdmin Portal Routes */}
-          <Route path="/superadmin/*" element={<SystemOwnerApp />} />
+          <Route path="/superadmin/*" element={<SuperAdminApp />} />
           
           {/* Regular Tenant Portal Routes */}
           <Route path="/*" element={

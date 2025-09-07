@@ -3,7 +3,7 @@ import Modal from '../ui/Modal'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import Button from '../ui/Button'
-import { useSystemOwnerStore } from '../../stores/systemOwnerStore'
+import { useSuperAdminStore } from '../../stores/superAdminStore'
 
 const SUBSCRIPTION_PLANS = [
   { value: 'trial', label: 'Trial (14 days)' },
@@ -30,7 +30,7 @@ export default function AddOrganizationModal({ isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const { createOrganization } = useSystemOwnerStore()
+  const { createOrganization } = useSuperAdminStore()
 
   const generateSlug = (name) => {
     return name

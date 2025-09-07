@@ -18,7 +18,7 @@ vi.mock('../pages/PaymentsPage', () => ({
   default: () => <div>Payments Page</div>
 }))
 
-vi.mock('../SystemOwnerApp', () => ({
+vi.mock('../SuperAdminApp', () => ({
   default: () => <div>SuperAdmin App</div>
 }))
 

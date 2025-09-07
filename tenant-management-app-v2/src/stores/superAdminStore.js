@@ -1,18 +1,18 @@
 import { create } from 'zustand'
-import { systemOwnerAuthService } from '../services/systemOwnerAuth'
+import { superAdminAuthService } from '../services/superAdminAuth'
 import { supabase } from '../services/supabase'
 
-export const useSystemOwnerStore = create((set, get) => ({
+export const useSuperAdminStore = create((set, get) => ({
   user: null,
   profile: null,
-  systemOwner: null,
+  superAdmin: null,
   loading: true,
   organizations: [],
   metrics: null,
   
   setUser: (user) => set({ user }),
   setProfile: (profile) => set({ profile }),
-  setSystemOwner: (systemOwner) => set({ systemOwner }),
+  setSuperAdmin: (superAdmin) => set({ superAdmin }),
   setLoading: (loading) => set({ loading }),
   setOrganizations: (organizations) => set({ organizations }),
   setMetrics: (metrics) => set({ metrics }),
@@ -27,34 +27,34 @@ export const useSystemOwnerStore = create((set, get) => ({
         try {
           const { data: profile, error: profileError } = await supabase
             .from('user_profiles')
-            .select('id, email, full_name, is_system_owner, role')
+            .select('id, email, full_name, is_super_admin, role')
             .eq('id', session.user.id)
             .single()
 
-          if (profileError || !profile?.is_system_owner) {
-            console.log('User is not a system owner or profile not found')
-            set({ user: null, profile: null, systemOwner: null })
+          if (profileError || !profile?.is_super_admin) {
+            console.log('User is not a super admin or profile not found')
+            set({ user: null, profile: null, superAdmin: null })
             return false
           }
 
           set({ 
             user: session.user, 
             profile: profile,
-            systemOwner: { id: session.user.id, email: profile.email, full_name: profile.full_name }
+            superAdmin: { id: session.user.id, email: profile.email, full_name: profile.full_name }
           })
           return true
         } catch (dbError) {
           console.error('Database error during auth check:', dbError)
-          set({ user: null, profile: null, systemOwner: null })
+          set({ user: null, profile: null, superAdmin: null })
           return false
         }
       } else {
-        set({ user: null, profile: null, systemOwner: null })
+        set({ user: null, profile: null, superAdmin: null })
         return false
       }
     } catch (error) {
-      console.error('System owner auth check error:', error)
-      set({ user: null, profile: null, systemOwner: null })
+      console.error('Super admin auth check error:', error)
+      set({ user: null, profile: null, superAdmin: null })
       return false
     } finally {
       set({ loading: false })
@@ -62,13 +62,13 @@ export const useSystemOwnerStore = create((set, get) => ({
   },
 
   signIn: async (email, password) => {
-    const { data, error } = await systemOwnerAuthService.signIn(email, password)
+    const { data, error } = await superAdminAuthService.signIn(email, password)
     
     if (data) {
       set({ 
         user: data.user, 
         profile: data.profile,
-        systemOwner: data.profile.system_owners?.[0] || null
+        superAdmin: data.profile.super_admins?.[0] || null
       })
     }
     
@@ -80,7 +80,7 @@ export const useSystemOwnerStore = create((set, get) => ({
     set({ 
       user: null, 
       profile: null, 
-      systemOwner: null,
+      superAdmin: null,
       organizations: [],
       metrics: null
     })
@@ -147,7 +147,7 @@ export const useSystemOwnerStore = create((set, get) => ({
 
       // Try to log the action (don't fail if logging fails)
       try {
-        await systemOwnerAuthService.logAction('create_organization', data.id, {
+        await superAdminAuthService.logAction('create_organization', data.id, {
           organization_name: data.name,
           subscription_plan: data.subscription_plan
         })
@@ -179,7 +179,7 @@ export const useSystemOwnerStore = create((set, get) => ({
       if (error) throw error
 
       // Log the action
-      await systemOwnerAuthService.logAction('update_organization', id, {
+      await superAdminAuthService.logAction('update_organization', id, {
         updates
       })
 
@@ -204,7 +204,7 @@ export const useSystemOwnerStore = create((set, get) => ({
       if (error) throw error
 
       // Log the action
-      await systemOwnerAuthService.logAction('delete_organization', id)
+      await superAdminAuthService.logAction('delete_organization', id)
 
       // Refresh organizations list
       await get().fetchOrganizations()
@@ -248,7 +248,7 @@ export const useSystemOwnerStore = create((set, get) => ({
           const { count: usersCount, error: usersError } = await supabase
             .from('user_profiles')
             .select('*', { count: 'exact', head: true })
-            .eq('is_system_owner', false)
+            .eq('is_super_admin', false)
           
           if (!usersError) totalUsers = usersCount || 0
           console.log('Users count:', totalUsers)
@@ -297,7 +297,7 @@ export const useSystemOwnerStore = create((set, get) => ({
       console.error('Error fetching system metrics:', error)
       const fallbackMetrics = {
         totalOrganizations: 0,
-        totalUsers: 1, // At least the system owner
+        totalUsers: 1, // At least the super admin
         totalProperties: 0,
         totalActiveTenants: 0,
         lastUpdated: new Date().toISOString()
@@ -311,6 +311,6 @@ export const useSystemOwnerStore = create((set, get) => ({
 // Listen for auth state changes
 supabase.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') {
-    useSystemOwnerStore.getState().signOut()
+    useSuperAdminStore.getState().signOut()
   }
 })

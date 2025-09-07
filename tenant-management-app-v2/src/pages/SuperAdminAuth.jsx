@@ -1,17 +1,17 @@
 import { useState } from 'react'
-import { useSystemOwnerStore } from '../stores/systemOwnerStore'
+import { useSuperAdminStore } from '../stores/superAdminStore'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Card from '../components/ui/Card'
 import Spinner from '../components/ui/Spinner'
 
-export default function SystemOwnerAuth() {
+export default function SuperAdminAuth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   
-  const { signIn } = useSystemOwnerStore()
+  const { signIn } = useSuperAdminStore()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -32,7 +32,7 @@ export default function SystemOwnerAuth() {
         setError(signInError.message || 'Failed to sign in')
       }
     } catch (error) {
-      console.error('System owner login error:', error)
+      console.error('Super admin login error:', error)
       setError(error.message || 'Login failed - please try again')
     } finally {
       setLoading(false)

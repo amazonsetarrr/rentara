@@ -1,10 +1,10 @@
 import { supabase } from './supabase'
 
-export const systemOwnerAuthService = {
-  // Sign in system owner
+export const superAdminAuthService = {
+  // Sign in super admin
   async signIn(email, password) {
     try {
-      console.log('System owner sign in attempt for:', email)
+      console.log('Super admin sign in attempt for:', email)
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -16,13 +16,13 @@ export const systemOwnerAuthService = {
         return { data: null, error }
       }
 
-      console.log('Auth successful, checking system owner status...')
+      console.log('Auth successful, checking super admin status...')
 
-      // Check if user_profiles table exists and user is system owner
+      // Check if user_profiles table exists and user is super admin
       try {
-        console.log('Checking user profile for system owner status...')
+        console.log('Checking user profile for super admin status...')
         
-        // First check if the is_system_owner column exists by trying a simple query
+        // First check if the is_super_admin column exists by trying a simple query
         const { data: profile, error: profileError } = await supabase
           .from('user_profiles')
           .select('id, email, full_name, role')
@@ -50,51 +50,51 @@ export const systemOwnerAuthService = {
           }
         }
 
-        // Now try to check for system owner column - this might fail if column doesn't exist
+        // Now try to check for super admin column - this might fail if column doesn't exist
         try {
-          const { data: systemOwnerCheck, error: systemOwnerError } = await supabase
+          const { data: superAdminCheck, error: superAdminError } = await supabase
             .from('user_profiles')
-            .select('is_system_owner')
+            .select('is_super_admin')
             .eq('id', data.user.id)
             .single()
 
-          console.log('System owner check result:', { systemOwnerCheck, systemOwnerError })
+          console.log('Super admin check result:', { superAdminCheck, superAdminError })
 
-          if (systemOwnerError || !systemOwnerCheck?.is_system_owner) {
-            console.log('User is not a system owner or column does not exist')
+          if (superAdminError || !superAdminCheck?.is_super_admin) {
+            console.log('User is not a super admin or column does not exist')
             await supabase.auth.signOut()
             return { 
               data: null, 
-              error: { message: 'Access denied. System owner privileges required, or system owner schema not set up.' }
+              error: { message: 'Access denied. Super admin privileges required, or super admin schema not set up.' }
             }
           }
 
-          console.log('System owner verification successful')
-          return { data: { user: data.user, profile: { ...profile, is_system_owner: true } }, error: null }
-        } catch (systemOwnerError) {
-          console.error('System owner column check failed:', systemOwnerError)
+          console.log('Super admin verification successful')
+          return { data: { user: data.user, profile: { ...profile, is_super_admin: true } }, error: null }
+        } catch (superAdminError) {
+          console.error('Super admin column check failed:', superAdminError)
           await supabase.auth.signOut()
           return { 
             data: null, 
-            error: { message: 'System owner authentication not configured. Please run the system owner database setup.' }
+            error: { message: 'Super admin authentication not configured. Please run the super admin database setup.' }
           }
         }
       } catch (dbError) {
-        console.error('Database error during system owner check:', dbError)
+        console.error('Database error during super admin check:', dbError)
         await supabase.auth.signOut()
         return { 
           data: null, 
-          error: { message: 'Database error. Please ensure the system owner schema is set up.' }
+          error: { message: 'Database error. Please ensure the super admin schema is set up.' }
         }
       }
     } catch (error) {
-      console.error('System owner sign in error:', error)
+      console.error('Super admin sign in error:', error)
       return { data: null, error }
     }
   },
 
-  // Create system owner
-  async createSystemOwner(email, password, fullName, permissions = {}) {
+  // Create super admin
+  async createSuperAdmin(email, password, fullName, permissions = {}) {
     try {
       // 1. Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -104,16 +104,16 @@ export const systemOwnerAuthService = {
 
       if (authError) return { data: null, error: authError }
 
-      // 2. Create system owner profile
+      // 2. Create super admin profile
       const { data: profileData, error: profileError } = await supabase
         .from('user_profiles')
         .insert([{
           id: authData.user.id,
           email,
           full_name: fullName,
-          organization_id: null, // System owners don't belong to organizations
-          role: 'system_owner',
-          is_system_owner: true
+          organization_id: null, // Super admins don't belong to organizations
+          role: 'super_admin',
+          is_super_admin: true
         }])
         .select()
         .single()
@@ -123,9 +123,9 @@ export const systemOwnerAuthService = {
         return { data: null, error: profileError }
       }
 
-      // 3. Create system owner record
-      const { data: systemOwnerData, error: systemOwnerError } = await supabase
-        .from('system_owners')
+      // 3. Create super admin record
+      const { data: superAdminData, error: superAdminError } = await supabase
+        .from('super_admins')
         .insert([{
           id: authData.user.id,
           full_name: fullName,
@@ -140,16 +140,16 @@ export const systemOwnerAuthService = {
         .select()
         .single()
 
-      if (systemOwnerError) {
+      if (superAdminError) {
         await supabase.auth.admin.deleteUser(authData.user.id)
-        return { data: null, error: systemOwnerError }
+        return { data: null, error: superAdminError }
       }
 
       return { 
         data: { 
           user: authData.user, 
           profile: profileData,
-          systemOwner: systemOwnerData 
+          superAdmin: superAdminData 
         }, 
         error: null 
       }
@@ -158,33 +158,33 @@ export const systemOwnerAuthService = {
     }
   },
 
-  // Get system owner profile
-  async getSystemOwnerProfile(userId) {
+  // Get super admin profile
+  async getSuperAdminProfile(userId) {
     const { data, error } = await supabase
       .from('user_profiles')
       .select(`
         *,
-        system_owners(*)
+        super_admins(*)
       `)
       .eq('id', userId)
-      .eq('is_system_owner', true)
+      .eq('is_super_admin', true)
       .single()
     
     return { data, error }
   },
 
-  // Check if user is system owner
-  async isSystemOwner(userId) {
+  // Check if user is super admin
+  async isSuperAdmin(userId) {
     const { data } = await supabase
       .from('user_profiles')
-      .select('is_system_owner')
+      .select('is_super_admin')
       .eq('id', userId)
       .single()
     
-    return data?.is_system_owner === true
+    return data?.is_super_admin === true
   },
 
-  // Log system owner action
+  // Log super admin action
   async logAction(action, organizationId = null, details = {}, ipAddress = null) {
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -192,9 +192,9 @@ export const systemOwnerAuthService = {
       if (!user) return { error: 'No authenticated user' }
 
       const { error } = await supabase
-        .from('system_audit_log')
+        .from('super_admin_audit_log')
         .insert([{
-          system_owner_id: user.id,
+          super_admin_id: user.id,
           organization_id: organizationId,
           action,
           details,

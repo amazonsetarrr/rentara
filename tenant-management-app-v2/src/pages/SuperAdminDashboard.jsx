@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSystemOwnerStore } from '../stores/systemOwnerStore'
+import { useSuperAdminStore } from '../stores/superAdminStore'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Table from '../components/ui/Table'
@@ -7,14 +7,14 @@ import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
 import AddOrganizationModal from '../components/modals/AddOrganizationModal'
 
-export default function SystemOwnerDashboard() {
+export default function SuperAdminDashboard() {
   const { 
     organizations, 
     metrics, 
     fetchOrganizations, 
     fetchSystemMetrics,
     updateOrganization
-  } = useSystemOwnerStore()
+  } = useSuperAdminStore()
   
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -22,23 +22,23 @@ export default function SystemOwnerDashboard() {
 
   useEffect(() => {
     const loadData = async () => {
-      console.log('🚀 SystemOwnerDashboard: Starting data load...')
+      console.log('🚀 SuperAdminDashboard: Starting data load...')
       setLoading(true)
       
       try {
-        console.log('📊 SystemOwnerDashboard: Fetching organizations...')
+        console.log('📊 SuperAdminDashboard: Fetching organizations...')
         const orgResult = await fetchOrganizations()
-        console.log('📊 SystemOwnerDashboard: Organizations result:', orgResult)
+        console.log('📊 SuperAdminDashboard: Organizations result:', orgResult)
         
-        console.log('📈 SystemOwnerDashboard: Fetching metrics...')
+        console.log('📈 SuperAdminDashboard: Fetching metrics...')
         const metricsResult = await fetchSystemMetrics()
-        console.log('📈 SystemOwnerDashboard: Metrics result:', metricsResult)
+        console.log('📈 SuperAdminDashboard: Metrics result:', metricsResult)
         
-        console.log('✅ SystemOwnerDashboard: Data load complete')
+        console.log('✅ SuperAdminDashboard: Data load complete')
       } catch (error) {
-        console.error('❌ SystemOwnerDashboard: Data load error:', error)
+        console.error('❌ SuperAdminDashboard: Data load error:', error)
       } finally {
-        console.log('🏁 SystemOwnerDashboard: Setting loading to false')
+        console.log('🏁 SuperAdminDashboard: Setting loading to false')
         setLoading(false)
       }
     }
