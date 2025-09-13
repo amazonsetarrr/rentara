@@ -5,6 +5,7 @@ import SuperAdminProtectedRoute from './components/auth/SuperAdminProtectedRoute
 import SuperAdminAuth from './pages/SuperAdminAuth'
 import SuperAdminDashboard from './pages/SuperAdminDashboard'
 import SuperAdminUsers from './pages/SuperAdminUsers'
+import SuperAdminNotFound from './pages/SuperAdminNotFound'
 import Spinner from './components/ui/Spinner'
 
 function SuperAdminApp() {
@@ -81,6 +82,8 @@ function SuperAdminApp() {
           </SuperAdminProtectedRoute>
         } 
       />
+      {/* Catch-all route for SuperAdmin 404 errors */}
+      <Route path="*" element={<SuperAdminNotFound />} />
     </Routes>
   )
 }

@@ -11,6 +11,7 @@ import TenantsPage from './pages/TenantsPage'
 import PaymentsPage from './pages/PaymentsPage'
 import ReportsPage from './pages/ReportsPage'
 import SettingsPage from './pages/SettingsPage'
+import NotFoundPage from './pages/NotFoundPage'
 import Spinner from './components/ui/Spinner'
 import SuperAdminApp from './SuperAdminApp'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -130,6 +131,8 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              {/* Catch-all route for 404 errors */}
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Layout>
         } />
