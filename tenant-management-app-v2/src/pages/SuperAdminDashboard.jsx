@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useSuperAdminStore } from '../stores/superAdminStore'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -158,6 +159,26 @@ export default function SuperAdminDashboard() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">SuperAdmin Dashboard</h1>
               <p className="text-gray-600 mt-1">Manage all organizations and system-wide settings</p>
+              <div className="flex space-x-4 mt-4">
+                <Link 
+                  to="/superadmin/dashboard" 
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  to="/superadmin/users" 
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Users
+                </Link>
+                <Link 
+                  to="/superadmin/organizations" 
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Organizations
+                </Link>
+              </div>
             </div>
             <Button onClick={handleRefresh} disabled={refreshing}>
               {refreshing ? <Spinner size="sm" className="mr-2" /> : null}

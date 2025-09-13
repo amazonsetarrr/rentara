@@ -4,6 +4,7 @@ import { useSuperAdminStore } from './stores/superAdminStore'
 import SuperAdminProtectedRoute from './components/auth/SuperAdminProtectedRoute'
 import SuperAdminAuth from './pages/SuperAdminAuth'
 import SuperAdminDashboard from './pages/SuperAdminDashboard'
+import SuperAdminUsers from './pages/SuperAdminUsers'
 import Spinner from './components/ui/Spinner'
 
 function SuperAdminApp() {
@@ -36,6 +37,14 @@ function SuperAdminApp() {
         element={
           <SuperAdminProtectedRoute>
             <SuperAdminDashboard />
+          </SuperAdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/users" 
+        element={
+          <SuperAdminProtectedRoute>
+            <SuperAdminUsers />
           </SuperAdminProtectedRoute>
         } 
       />

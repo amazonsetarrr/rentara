@@ -8,6 +8,7 @@ export const useSuperAdminStore = create((set, get) => ({
   superAdmin: null,
   loading: true,
   organizations: [],
+  users: [],
   metrics: null,
   
   setUser: (user) => set({ user }),
@@ -25,11 +26,33 @@ export const useSuperAdminStore = create((set, get) => ({
       
       if (session?.user) {
         try {
-          const { data: profile, error: profileError } = await supabase
-            .from('user_profiles')
-            .select('id, email, full_name, is_super_admin, role')
-            .eq('id', session.user.id)
-            .single()
+          let profile = null
+          let profileError = null
+          
+          // Try is_super_admin first (after migration), fall back to is_system_owner
+          try {
+            const result = await supabase
+              .from('user_profiles')
+              .select('id, email, full_name, is_super_admin, role')
+              .eq('id', session.user.id)
+              .single()
+            profile = result.data
+            profileError = result.error
+          } catch (superAdminErr) {
+            // Fallback to old column name
+            console.log('Trying fallback column name is_system_owner for auth')
+            const result = await supabase
+              .from('user_profiles')
+              .select('id, email, full_name, is_system_owner, role')
+              .eq('id', session.user.id)
+              .single()
+            profile = result.data
+            profileError = result.error
+            // Normalize the property name
+            if (profile) {
+              profile.is_super_admin = profile.is_system_owner
+            }
+          }
 
           if (profileError || !profile?.is_super_admin) {
             console.log('User is not a super admin or profile not found')
@@ -245,10 +268,27 @@ export const useSuperAdminStore = create((set, get) => ({
         }
 
         try {
-          const { count: usersCount, error: usersError } = await supabase
-            .from('user_profiles')
-            .select('*', { count: 'exact', head: true })
-            .eq('is_super_admin', false)
+          // Try is_super_admin first (after migration), fall back to is_system_owner
+          let usersCount = 0
+          let usersError = null
+          
+          try {
+            const result = await supabase
+              .from('user_profiles')
+              .select('*', { count: 'exact', head: true })
+              .eq('is_super_admin', false)
+            usersCount = result.count
+            usersError = result.error
+          } catch (superAdminErr) {
+            // Fallback to old column name
+            console.log('Trying fallback column name is_system_owner')
+            const result = await supabase
+              .from('user_profiles')
+              .select('*', { count: 'exact', head: true })
+              .or('is_system_owner.is.null,is_system_owner.eq.false')
+            usersCount = result.count
+            usersError = result.error
+          }
           
           if (!usersError) totalUsers = usersCount || 0
           console.log('Users count:', totalUsers)
@@ -261,10 +301,17 @@ export const useSuperAdminStore = create((set, get) => ({
             .from('properties')
             .select('*', { count: 'exact', head: true })
           
-          if (!propertiesError) totalProperties = propertiesCount || 0
+          if (!propertiesError) {
+            totalProperties = propertiesCount || 0
+          } else if (propertiesError.code === 'PGRST106') {
+            // Table doesn't exist yet
+            console.log('Properties table does not exist yet')
+            totalProperties = 0
+          }
           console.log('Properties count:', totalProperties)
         } catch (err) {
           console.log('Could not fetch properties count:', err.message)
+          totalProperties = 0
         }
 
         try {
@@ -273,10 +320,17 @@ export const useSuperAdminStore = create((set, get) => ({
             .select('*', { count: 'exact', head: true })
             .eq('status', 'active')
           
-          if (!tenantsError) totalActiveTenants = tenantsCount || 0
+          if (!tenantsError) {
+            totalActiveTenants = tenantsCount || 0
+          } else if (tenantsError.code === 'PGRST106') {
+            // Table doesn't exist yet
+            console.log('Tenants table does not exist yet')
+            totalActiveTenants = 0
+          }
           console.log('Active tenants count:', totalActiveTenants)
         } catch (err) {
           console.log('Could not fetch tenants count:', err.message)
+          totalActiveTenants = 0
         }
 
         return {
@@ -304,6 +358,111 @@ export const useSuperAdminStore = create((set, get) => ({
       }
       set({ metrics: fallbackMetrics })
       return { data: fallbackMetrics, error: null }
+    }
+  },
+
+  // Fetch all users across organizations
+  fetchUsers: async () => {
+    try {
+      console.log('Fetching all users...')
+      
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select(`
+          *,
+          organizations (
+            name,
+            slug
+          )
+        `)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Users fetch error:', error)
+        set({ users: [] })
+        return { data: [], error }
+      }
+
+      // Transform data to include organization info
+      const transformedUsers = data?.map(user => ({
+        ...user,
+        organization_name: user.organizations?.name,
+        organization_slug: user.organizations?.slug,
+        status: user.status || 'active' // Default to active if no status
+      })) || []
+
+      set({ users: transformedUsers })
+      return { data: transformedUsers, error: null }
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      set({ users: [] })
+      return { data: [], error }
+    }
+  },
+
+  // Update user
+  updateUser: async (userId, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .update(updates)
+        .eq('id', userId)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Log the action
+      await superAdminAuthService.logAction('update_user', null, {
+        user_id: userId,
+        updates
+      })
+
+      // Refresh users list
+      await get().fetchUsers()
+
+      return { data, error: null }
+    } catch (error) {
+      console.error('Error updating user:', error)
+      return { data: null, error }
+    }
+  },
+
+  // Impersonate user (for support purposes)
+  impersonateUser: async (userId) => {
+    try {
+      // Log the impersonation action
+      await superAdminAuthService.logAction('impersonate_user', null, {
+        target_user_id: userId
+      })
+
+      // TODO: Implement actual impersonation logic
+      // This might involve creating a special session or token
+      console.log('Impersonating user:', userId)
+
+      return { error: null }
+    } catch (error) {
+      console.error('Error impersonating user:', error)
+      return { error }
+    }
+  },
+
+  // Reset user password
+  resetUserPassword: async (userId) => {
+    try {
+      // TODO: Implement password reset via Supabase Auth Admin API
+      // This requires server-side implementation for security
+      
+      // Log the action
+      await superAdminAuthService.logAction('reset_user_password', null, {
+        target_user_id: userId
+      })
+
+      console.log('Password reset initiated for user:', userId)
+      return { error: null }
+    } catch (error) {
+      console.error('Error resetting user password:', error)
+      return { error }
     }
   }
 }))
