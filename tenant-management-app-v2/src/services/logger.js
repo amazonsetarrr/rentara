@@ -1,5 +1,6 @@
 // Centralized Logging Service
 // Provides comprehensive error tracking and monitoring capabilities
+import LokiTransport from './LokiTransport.js'
 
 class Logger {
   constructor() {
@@ -8,7 +9,10 @@ class Logger {
     this.logLevel = import.meta.env.PROD ? 'error' : 'debug'
     this.enableLocalStorage = true
     this.enableConsole = true
-    
+
+    // Initialize Loki transport for remote logging
+    this.lokiTransport = new LokiTransport()
+
     // Initialize logger
     this.init()
   }
@@ -160,6 +164,9 @@ class Logger {
     this.logs.push(logEntry)
     this.cleanupLogs()
     this.saveLogsToStorage()
+
+    // Ship to Loki if enabled
+    this.lokiTransport.push(logEntry)
 
     return logEntry
   }
@@ -350,7 +357,7 @@ class Logger {
     return async (...args) => {
       const start = performance.now()
       this.debug(`Starting ${name}`, { args })
-      
+
       try {
         const result = await fn(...args)
         const duration = performance.now() - start
@@ -361,6 +368,46 @@ class Logger {
         const duration = performance.now() - start
         this.error(`Failed ${name}`, { duration, error: error.message, args })
         throw error
+      }
+    }
+  }
+
+  // Loki transport management
+  getLokiStatus() {
+    return this.lokiTransport.getStatus()
+  }
+
+  async flushToLoki() {
+    return await this.lokiTransport.forceFlush()
+  }
+
+  enableLoki() {
+    this.lokiTransport.enable()
+    this.info('Loki transport enabled', { type: 'loki_config' })
+  }
+
+  disableLoki() {
+    this.lokiTransport.disable()
+    this.info('Loki transport disabled', { type: 'loki_config' })
+  }
+
+  // Enhanced error summary with Loki status
+  getSystemStatus() {
+    const errorSummary = this.getErrorSummary(24)
+    const lokiStatus = this.getLokiStatus()
+
+    return {
+      errors: errorSummary,
+      loki: lokiStatus,
+      logs: {
+        total: this.logs.length,
+        maxLogs: this.maxLogs,
+        logLevel: this.logLevel
+      },
+      environment: {
+        mode: import.meta.env.MODE,
+        production: import.meta.env.PROD,
+        timestamp: new Date().toISOString()
       }
     }
   }

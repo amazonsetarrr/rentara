@@ -197,6 +197,16 @@ When updating dependencies:
 - **Logging System**: Comprehensive application logging with LogMonitor component
 
 ### Recent Updates (Latest)
+- **Loki/Grafana Integration**: Centralized logging and monitoring system
+  - Added `LokiTransport.js` for shipping logs to Grafana Loki
+  - Enhanced Logger service with remote logging capabilities
+  - Batching, retry logic, and environment-specific configuration
+  - LogMonitor component with Loki status monitoring and controls
+  - Comprehensive setup documentation in `docs/LOKI_SETUP.md`
+  - Pre-built Grafana dashboard for application monitoring
+  - Environment variables for secure configuration management
+  - Integration eliminates need for console debugging and provides real-time monitoring
+
 - **Record Payment Quick Action**: Streamlined payment recording from dashboard (commit `a226541`)
   - Added `QuickPaymentForm.jsx` with smart tenant/payment selection
   - Modal-based workflow consistent with other quick actions
@@ -251,6 +261,7 @@ When updating dependencies:
 - **Branding**: Complete Rentara brand implementation
 - **Malaysian Localization**: State/city dropdown functionality
 - **Dashboard Quick Actions**: Add Property, Unit, Tenant, and Record Payment
+- **Centralized Logging**: Loki/Grafana integration with real-time monitoring
 
 ### 🚧 In Progress / Planned Enhancements
 - **Advanced Analytics**: Enhanced reporting dashboards
