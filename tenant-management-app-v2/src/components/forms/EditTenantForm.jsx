@@ -520,7 +520,12 @@ export default function EditTenantForm({ tenant, onSuccess, onCancel }) {
 
       {/* Financial Information */}
       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-indigo-900 mb-4">💰 Financial Information (Malaysian Ringgit)</h3>
+        <h3 className="text-lg font-semibold text-indigo-900 mb-4 flex items-center">
+          <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+          </svg>
+          Financial Information (Malaysian Ringgit)
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
             label="Monthly Rent (RM)"

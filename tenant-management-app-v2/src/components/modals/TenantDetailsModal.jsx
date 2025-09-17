@@ -90,7 +90,7 @@ export default function TenantDetailsModal({ isOpen, onClose, tenantId, onEdit }
   const tabs = [
     { id: 'overview', name: 'Overview', icon: '👤' },
     { id: 'lease', name: 'Lease Details', icon: '📋' },
-    { id: 'financial', name: 'Financial', icon: '💰' },
+    { id: 'financial', name: 'Financial', icon: '💳' },
     { id: 'compliance', name: 'Compliance', icon: '📄' }
   ]
 
@@ -332,7 +332,12 @@ export default function TenantDetailsModal({ isOpen, onClose, tenantId, onEdit }
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Security Deposit */}
                 <div className="bg-green-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-green-900 mb-2">💰 Security Deposit</h3>
+                  <h3 className="text-lg font-semibold text-green-900 mb-2 flex items-center">
+                    <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                    </svg>
+                    Security Deposit
+                  </h3>
                   <p className="text-2xl font-bold text-green-700">
                     {tenant.security_deposit ? formatRinggit(tenant.security_deposit) : 'Not set'}
                   </p>
@@ -341,7 +346,12 @@ export default function TenantDetailsModal({ isOpen, onClose, tenantId, onEdit }
 
                 {/* Deposit Paid */}
                 <div className="bg-blue-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-2">💵 Deposit Paid</h3>
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2 flex items-center">
+                    <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                    </svg>
+                    Deposit Paid
+                  </h3>
                   <p className="text-2xl font-bold text-blue-700">
                     {tenant.deposit_paid ? formatRinggit(tenant.deposit_paid) : 'Not set'}
                   </p>
