@@ -11,6 +11,11 @@ class LokiTransport {
 
     // Disable in local development due to CORS restrictions
     this.isLocalDev = import.meta.env.MODE === 'development' && window.location.hostname === 'localhost'
+
+    // Grafana Cloud typically doesn't allow direct browser requests due to CORS
+    this.isBrowserEnvironment = typeof window !== 'undefined'
+    this.corsIssue = false
+
     if (this.isLocalDev && this.enabled) {
       console.warn('🟡 Loki transport disabled in local development due to CORS restrictions')
       console.warn('🟡 Logs will be stored locally and shipped when deployed to production')
@@ -198,6 +203,16 @@ class LokiTransport {
 
       } catch (error) {
         lastError = error
+
+        // Check if this is a CORS error
+        if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+          this.corsIssue = true
+          console.warn('🚫 CORS error detected - Grafana Cloud Loki does not allow direct browser requests')
+          console.warn('💡 Consider implementing server-side logging or using a proxy for production logs')
+          this.enabled = false // Disable to prevent further attempts
+          break // Don't retry CORS errors
+        }
+
         console.warn(`Failed to send logs to Loki (attempt ${attempt + 1}):`, error.message)
 
         // Wait before retry (except on last attempt or immediate flush)
@@ -240,6 +255,7 @@ class LokiTransport {
     return {
       enabled: this.enabled,
       localDevMode: this.localDevMode || false,
+      corsIssue: this.corsIssue || false,
       endpoint: this.endpoint,
       tenant: this.tenant,
       environment: this.defaultLabels.environment,

@@ -161,19 +161,27 @@ export default function LogMonitor({ isOpen, onClose }) {
 
           <div className="p-6 max-h-[80vh] overflow-y-auto">
             {/* Loki Status */}
-            <Card className={`mb-6 ${systemStatus.loki.enabled ? 'border-green-200 bg-green-50' : systemStatus.loki.localDevMode ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200 bg-gray-50'}`}>
+            <Card className={`mb-6 ${systemStatus.loki.enabled ? 'border-green-200 bg-green-50' : systemStatus.loki.corsIssue ? 'border-red-200 bg-red-50' : systemStatus.loki.localDevMode ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200 bg-gray-50'}`}>
               <CardContent className="p-4">
                 <h3 className="text-lg font-medium text-gray-800 mb-2">
                   📡 Loki Logging Status
                 </h3>
+                {systemStatus.loki.corsIssue && (
+                  <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-md">
+                    <p className="text-sm text-red-800">
+                      🚫 <strong>CORS Error:</strong> Grafana Cloud Loki doesn't allow direct browser requests.
+                      Consider implementing server-side logging for production use.
+                    </p>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm text-gray-600">Status</p>
                     <Badge
-                      variant={systemStatus.loki.enabled ? 'success' : systemStatus.loki.localDevMode ? 'warning' : 'gray'}
+                      variant={systemStatus.loki.enabled ? 'success' : systemStatus.loki.corsIssue ? 'error' : systemStatus.loki.localDevMode ? 'warning' : 'gray'}
                       size="sm"
                     >
-                      {systemStatus.loki.enabled ? '🟢 Enabled' : systemStatus.loki.localDevMode ? '🟡 Local Dev' : '🔴 Disabled'}
+                      {systemStatus.loki.enabled ? '🟢 Enabled' : systemStatus.loki.corsIssue ? '🚫 CORS Error' : systemStatus.loki.localDevMode ? '🟡 Local Dev' : '🔴 Disabled'}
                     </Badge>
                   </div>
                   <div>
