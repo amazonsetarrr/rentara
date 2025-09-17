@@ -6,8 +6,10 @@ import Modal from '../components/ui/Modal'
 import Badge from '../components/ui/Badge'
 import Table, { TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/Table'
 import AddTenantForm from '../components/forms/AddTenantForm'
+import EditTenantForm from '../components/forms/EditTenantForm'
+import TenantDetailsModal from '../components/modals/TenantDetailsModal'
 import Spinner from '../components/ui/Spinner'
-import { formatCurrency } from '../utils/currency'
+import { formatRinggit, formatMalaysianPhone } from '../utils/malaysianValidation'
 
 const STATUS_COLORS = {
   active: 'success',
@@ -20,6 +22,9 @@ export default function TenantsPage() {
   const [tenants, setTenants] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
+  const [selectedTenant, setSelectedTenant] = useState(null)
 
   useEffect(() => {
     loadTenants()
@@ -35,6 +40,28 @@ export default function TenantsPage() {
   const handleAddTenant = (newTenant) => {
     setTenants(prev => [newTenant, ...prev])
     setShowAddModal(false)
+  }
+
+  const handleViewTenant = (tenant) => {
+    setSelectedTenant(tenant)
+    setShowDetailsModal(true)
+  }
+
+  const handleEditTenant = (tenant) => {
+    setSelectedTenant(tenant)
+    setShowEditModal(true)
+  }
+
+  const handleUpdateTenant = (updatedTenant) => {
+    setTenants(prev => prev.map(t => t.id === updatedTenant.id ? updatedTenant : t))
+    setShowEditModal(false)
+    setSelectedTenant(null)
+  }
+
+  const closeModals = () => {
+    setShowDetailsModal(false)
+    setShowEditModal(false)
+    setSelectedTenant(null)
   }
 
   const handleDeleteTenant = async (id) => {
@@ -197,8 +224,8 @@ export default function TenantsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <div>{tenant.phone}</div>
-                        <div className="text-gray-500">{tenant.email}</div>
+                        <div>{formatMalaysianPhone(tenant.phone) || 'No phone'}</div>
+                        <div className="text-gray-500">{tenant.email || 'No email'}</div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -230,7 +257,7 @@ export default function TenantsPage() {
                     <TableCell>
                       {tenant.rent_amount ? (
                         <div className="font-medium">
-                          {formatCurrency(tenant.rent_amount)}/mo
+                          {formatRinggit(tenant.rent_amount)}/mo
                         </div>
                       ) : (
                         <span className="text-gray-400">Not set</span>
@@ -243,15 +270,26 @@ export default function TenantsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          View
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewTenant(tenant)}
+                        >
+                          👁️ View
                         </Button>
-                        <Button 
-                          variant="danger" 
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditTenant(tenant)}
+                        >
+                          ✏️ Edit
+                        </Button>
+                        <Button
+                          variant="danger"
                           size="sm"
                           onClick={() => handleDeleteTenant(tenant.id)}
                         >
-                          Delete
+                          🗑️ Delete
                         </Button>
                       </div>
                     </TableCell>
@@ -274,6 +312,31 @@ export default function TenantsPage() {
           onCancel={() => setShowAddModal(false)}
         />
       </Modal>
+
+      <Modal
+        isOpen={showEditModal}
+        onClose={closeModals}
+        title="Edit Tenant Profile"
+        size="lg"
+      >
+        {selectedTenant && (
+          <EditTenantForm
+            tenant={selectedTenant}
+            onSuccess={handleUpdateTenant}
+            onCancel={closeModals}
+          />
+        )}
+      </Modal>
+
+      <TenantDetailsModal
+        isOpen={showDetailsModal}
+        onClose={closeModals}
+        tenantId={selectedTenant?.id}
+        onEdit={(tenant) => {
+          setShowDetailsModal(false)
+          handleEditTenant(tenant)
+        }}
+      />
     </div>
   )
 }
