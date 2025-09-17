@@ -82,9 +82,33 @@ export default function LogMonitor({ isOpen, onClose }) {
     return logger.getErrorSummary(24) // Last 24 hours
   }
 
+  const getSystemStatus = () => {
+    return logger.getSystemStatus()
+  }
+
+  const handleFlushToLoki = async () => {
+    try {
+      await logger.flushToLoki()
+      alert('Logs flushed to Loki successfully!')
+    } catch (error) {
+      alert(`Failed to flush logs to Loki: ${error.message}`)
+    }
+  }
+
+  const handleToggleLoki = () => {
+    const lokiStatus = logger.getLokiStatus()
+    if (lokiStatus.enabled) {
+      logger.disableLoki()
+    } else {
+      logger.enableLoki()
+    }
+    refreshLogs()
+  }
+
   if (!isOpen) return null
 
   const errorSummary = getErrorSummary()
+  const systemStatus = getSystemStatus()
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
@@ -114,6 +138,21 @@ export default function LogMonitor({ isOpen, onClose }) {
               <Button variant="outline" size="sm" onClick={clearLogs}>
                 🗑️ Clear
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleFlushToLoki}
+                disabled={!systemStatus.loki.enabled}
+              >
+                📤 Flush to Loki
+              </Button>
+              <Button
+                variant={systemStatus.loki.enabled ? "error" : "success"}
+                size="sm"
+                onClick={handleToggleLoki}
+              >
+                {systemStatus.loki.enabled ? '🔴 Disable Loki' : '🟢 Enable Loki'}
+              </Button>
               <Button variant="outline" size="sm" onClick={onClose}>
                 ✕ Close
               </Button>
@@ -121,6 +160,57 @@ export default function LogMonitor({ isOpen, onClose }) {
           </div>
 
           <div className="p-6 max-h-[80vh] overflow-y-auto">
+            {/* Loki Status */}
+            <Card className={`mb-6 ${systemStatus.loki.enabled ? 'border-green-200 bg-green-50' : systemStatus.loki.localDevMode ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200 bg-gray-50'}`}>
+              <CardContent className="p-4">
+                <h3 className="text-lg font-medium text-gray-800 mb-2">
+                  📡 Loki Logging Status
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Status</p>
+                    <Badge
+                      variant={systemStatus.loki.enabled ? 'success' : systemStatus.loki.localDevMode ? 'warning' : 'gray'}
+                      size="sm"
+                    >
+                      {systemStatus.loki.enabled ? '🟢 Enabled' : systemStatus.loki.localDevMode ? '🟡 Local Dev' : '🔴 Disabled'}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Endpoint</p>
+                    <p className="text-sm font-mono text-gray-800 truncate">
+                      {systemStatus.loki.endpoint || 'Not configured'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Buffer Size</p>
+                    <p className="text-lg font-bold text-gray-800">
+                      {systemStatus.loki.bufferSize}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Environment</p>
+                    <Badge variant="info" size="sm">
+                      {systemStatus.loki.environment}
+                    </Badge>
+                  </div>
+                </div>
+                {systemStatus.loki.tenant && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600">Tenant: <span className="font-mono">{systemStatus.loki.tenant}</span></p>
+                  </div>
+                )}
+                {systemStatus.loki.localDevMode && (
+                  <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded-md">
+                    <p className="text-sm text-yellow-800">
+                      <strong>ℹ️ Local Development Mode:</strong> Loki transport is disabled due to CORS restrictions.
+                      Logs are stored locally and will be shipped when deployed to production.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Error Summary */}
             {errorSummary.total > 0 && (
               <Card className="mb-6 border-red-200 bg-red-50">
