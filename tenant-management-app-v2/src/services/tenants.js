@@ -49,8 +49,105 @@ export const tenantsService = {
       `)
       .eq('id', id)
       .single()
-    
+
     return { data, error }
+  },
+
+  // Get tenants with expiring visas (Malaysian market specific)
+  async getExpiringVisas(days = 30) {
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() + days)
+
+    const { data, error } = await supabase
+      .from('tenants')
+      .select(`
+        *,
+        units (
+          id,
+          unit_number,
+          properties (
+            id,
+            name
+          )
+        )
+      `)
+      .neq('nationality', 'malaysian')
+      .neq('work_permit_type', 'none')
+      .lte('visa_expiry_date', cutoffDate.toISOString().split('T')[0])
+      .order('visa_expiry_date')
+
+    return { data, error }
+  },
+
+  // Get foreign tenants without local guarantors
+  async getForeignTenantsWithoutGuarantors() {
+    const { data, error } = await supabase
+      .from('tenants')
+      .select(`
+        *,
+        units (
+          id,
+          unit_number,
+          properties (
+            id,
+            name
+          )
+        )
+      `)
+      .neq('nationality', 'malaysian')
+      .or('guarantor_name.is.null,guarantor_phone.is.null,guarantor_ic.is.null')
+      .order('created_at', { ascending: false })
+
+    return { data, error }
+  },
+
+  // Get tenants by nationality (for compliance reporting)
+  async getTenantsByNationality() {
+    const { data, error } = await supabase
+      .from('tenants')
+      .select('nationality')
+      .not('nationality', 'is', null)
+
+    if (error) return { data: null, error }
+
+    // Group by nationality
+    const nationalityCounts = data.reduce((acc, tenant) => {
+      const nationality = tenant.nationality || 'unknown'
+      acc[nationality] = (acc[nationality] || 0) + 1
+      return acc
+    }, {})
+
+    return { data: nationalityCounts, error: null }
+  },
+
+  // Get Malaysian rental compliance summary
+  async getComplianceSummary() {
+    const { data: allTenants, error } = await supabase
+      .from('tenants')
+      .select('nationality, work_permit_type, visa_expiry_date, ic_number, guarantor_name, guarantor_phone, guarantor_ic')
+
+    if (error) return { data: null, error }
+
+    const today = new Date()
+    const summary = {
+      total: allTenants.length,
+      malaysian: allTenants.filter(t => t.nationality === 'malaysian').length,
+      foreign: allTenants.filter(t => t.nationality !== 'malaysian').length,
+      withIC: allTenants.filter(t => t.ic_number).length,
+      withGuarantor: allTenants.filter(t => t.guarantor_name && t.guarantor_phone).length,
+      expiredVisas: allTenants.filter(t =>
+        t.visa_expiry_date &&
+        new Date(t.visa_expiry_date) < today
+      ).length,
+      expiringVisas: allTenants.filter(t => {
+        if (!t.visa_expiry_date) return false
+        const expiryDate = new Date(t.visa_expiry_date)
+        const daysUntilExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24))
+        return daysUntilExpiry <= 30 && daysUntilExpiry > 0
+      }).length
+    }
+
+    return { data: summary, error: null }
   },
 
   async createTenant(tenant) {

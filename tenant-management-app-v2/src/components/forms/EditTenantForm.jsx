@@ -19,12 +19,13 @@ import {
 const TENANT_STATUSES = [
   { value: 'active', label: 'Active' },
   { value: 'pending', label: 'Pending Move-in' },
-  { value: 'inactive', label: 'Inactive' }
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'moved_out', label: 'Moved Out' }
 ]
 
-export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
+export default function EditTenantForm({ tenant, onSuccess, onCancel }) {
   const [formData, setFormData] = useState({
-    unit_id: unitId || '',
+    unit_id: '',
     first_name: '',
     last_name: '',
     email: '',
@@ -55,8 +56,34 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
   const [depositCalculation, setDepositCalculation] = useState(null)
 
   useEffect(() => {
+    if (tenant) {
+      setFormData({
+        unit_id: tenant.unit_id || '',
+        first_name: tenant.first_name || '',
+        last_name: tenant.last_name || '',
+        email: tenant.email || '',
+        phone: tenant.phone || '',
+        ic_number: tenant.ic_number || '',
+        nationality: tenant.nationality || 'malaysian',
+        work_permit_type: tenant.work_permit_type || 'none',
+        visa_expiry_date: tenant.visa_expiry_date || '',
+        emergency_contact_name: tenant.emergency_contact_name || '',
+        emergency_contact_phone: tenant.emergency_contact_phone || '',
+        guarantor_name: tenant.guarantor_name || '',
+        guarantor_phone: tenant.guarantor_phone || '',
+        guarantor_ic: tenant.guarantor_ic || '',
+        lease_start_date: tenant.lease_start_date || '',
+        lease_end_date: tenant.lease_end_date || '',
+        rent_amount: tenant.rent_amount || '',
+        deposit_paid: tenant.deposit_paid || '',
+        security_deposit: tenant.security_deposit || '',
+        status: tenant.status || 'active',
+        move_in_date: tenant.move_in_date || '',
+        notes: tenant.notes || ''
+      })
+    }
     loadUnits()
-  }, [])
+  }, [tenant])
 
   useEffect(() => {
     if (formData.rent_amount) {
@@ -68,16 +95,21 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
   }, [formData.rent_amount])
 
   const loadUnits = async () => {
-    const { data, error } = await unitsService.getVacantUnits()
-    
+    const { data, error } = await unitsService.getUnits()
+
     if (error) {
-      setError('Failed to load vacant units: ' + error.message)
+      setError('Failed to load units: ' + error.message)
     } else if (data) {
+      // Include current unit and vacant units
+      const availableUnits = data.filter(u =>
+        u.status === 'vacant' || u.id === tenant?.unit_id
+      )
+
       setUnits([
         { value: '', label: 'No unit assigned (can assign later)' },
-        ...data.map(u => ({
+        ...availableUnits.map(u => ({
           value: u.id,
-          label: `${u.properties.name} - Unit ${u.unit_number} (${u.unit_type})`
+          label: `${u.properties?.name || 'Unknown Property'} - Unit ${u.unit_number} (${u.unit_type || 'Unknown'})`
         }))
       ])
     }
@@ -203,14 +235,14 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
       })
     }
 
-    const { data, error } = await tenantsService.createTenant(submissionData)
-    
+    const { data, error } = await tenantsService.updateTenant(tenant.id, submissionData)
+
     if (error) {
       setError(error.message)
     } else {
       onSuccess?.(data)
     }
-    
+
     setLoading(false)
   }
 
@@ -251,13 +283,13 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h3 className="text-lg font-semibold text-blue-900 mb-4">🏠 Unit Assignment</h3>
         <Select
-          label="Unit (Optional)"
+          label="Unit"
           name="unit_id"
           value={formData.unit_id}
           onChange={handleChange}
           options={units}
           placeholder={loadingUnits ? "Loading units..." : "Select a unit or leave unassigned"}
-          disabled={loadingUnits || !!unitId}
+          disabled={loadingUnits}
           error={validationErrors.unit_id}
         />
         {!formData.unit_id && (
@@ -440,7 +472,7 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
         <h3 className="text-lg font-semibold text-green-900 mb-4">📋 Lease Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label="Lease Start Date (Optional)"
+            label="Lease Start Date"
             type="date"
             name="lease_start_date"
             value={formData.lease_start_date}
@@ -449,7 +481,7 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
           />
 
           <Input
-            label="Lease End Date (Optional)"
+            label="Lease End Date"
             type="date"
             name="lease_end_date"
             value={formData.lease_end_date}
@@ -587,7 +619,7 @@ export default function AddTenantForm({ onSuccess, onCancel, unitId = null }) {
           Cancel
         </Button>
         <Button type="submit" loading={loading}>
-          Add Tenant
+          Update Tenant
         </Button>
       </div>
     </form>
