@@ -70,11 +70,24 @@ export const organizationsService = {
 
     if (!profile) return { data: null, error: 'Profile not found' }
 
-    const { data, error } = await supabase
+    // Try to get from subscription view first, fallback to organizations table
+    let { data, error } = await supabase
       .from('organization_subscription_info')
       .select('*')
       .eq('id', profile.organization_id)
       .single()
+
+    // If view doesn't exist, fallback to organizations table
+    if (error && error.code === 'PGRST205') {
+      console.warn('organization_subscription_info view not found, falling back to organizations table')
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('*, subscription_type, subscription_start_date, subscription_end_date')
+        .eq('id', profile.organization_id)
+        .single()
+
+      return { data: orgData, error: orgError }
+    }
 
     return { data, error }
   },
@@ -123,6 +136,19 @@ export const organizationsService = {
       return { data: null, error: 'Failed to fetch all stats' };
     }
 
+    // Handle subscription info fallback if view doesn't exist
+    let subscriptionInfo = subscriptionResult.data;
+    if (subscriptionResult.error && subscriptionResult.error.code === 'PGRST205') {
+      console.warn('organization_subscription_info view not found, falling back to organizations table')
+      const { data: orgData } = await supabase
+        .from('organizations')
+        .select('*, subscription_type, subscription_start_date, subscription_end_date')
+        .eq('id', profile.organization_id)
+        .single()
+
+      subscriptionInfo = orgData;
+    }
+
     const total_properties = propertiesResult.data?.length || 0;
     const units = unitsResult.data || [];
     const total_units = units.length;
@@ -137,7 +163,7 @@ export const organizationsService = {
       occupancy_rate: total_units > 0
         ? Math.round((occupied_units / total_units) * 100)
         : 0,
-      subscription_info: subscriptionResult.data || null
+      subscription_info: subscriptionInfo || null
     };
 
     return { data: stats, error: null }
