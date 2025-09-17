@@ -166,11 +166,19 @@ export default function LogMonitor({ isOpen, onClose }) {
                 <h3 className="text-lg font-medium text-gray-800 mb-2">
                   📡 Loki Logging Status
                 </h3>
-                {systemStatus.loki.corsIssue && (
+                {systemStatus.loki.corsIssue && !systemStatus.loki.useProxy && (
                   <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-md">
                     <p className="text-sm text-red-800">
-                      🚫 <strong>CORS Error:</strong> Grafana Cloud Loki doesn't allow direct browser requests.
-                      Consider implementing server-side logging for production use.
+                      🚫 <strong>CORS Error:</strong> Direct browser requests to Grafana Cloud Loki are blocked.
+                      The proxy endpoint (/api/logs) will resolve this issue.
+                    </p>
+                  </div>
+                )}
+                {systemStatus.loki.useProxy && (
+                  <div className="mb-4 p-3 bg-blue-100 border border-blue-300 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      🔄 <strong>Proxy Mode:</strong> Using Vercel serverless function to forward logs to Loki.
+                      This bypasses CORS restrictions and provides secure server-side authentication.
                     </p>
                   </div>
                 )}
@@ -185,9 +193,21 @@ export default function LogMonitor({ isOpen, onClose }) {
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Endpoint</p>
+                    <p className="text-sm text-gray-600">Transport Mode</p>
+                    <Badge
+                      variant={systemStatus.loki.useProxy ? 'default' : 'gray'}
+                      size="sm"
+                    >
+                      {systemStatus.loki.useProxy ? '🔄 Proxy' : '🔗 Direct'}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Active Endpoint</p>
                     <p className="text-sm font-mono text-gray-800 truncate">
-                      {systemStatus.loki.endpoint || 'Not configured'}
+                      {systemStatus.loki.useProxy
+                        ? systemStatus.loki.proxyEndpoint || '/api/logs'
+                        : systemStatus.loki.endpoint || 'Not configured'
+                      }
                     </p>
                   </div>
                   <div>

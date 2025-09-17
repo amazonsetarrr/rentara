@@ -9,14 +9,16 @@ class LokiTransport {
     this.password = options.password || import.meta.env.VITE_LOKI_PASSWORD
     this.tenant = options.tenant || import.meta.env.VITE_LOKI_TENANT || 'rentara'
 
-    // Disable in local development due to CORS restrictions
-    this.isLocalDev = import.meta.env.MODE === 'development' && window.location.hostname === 'localhost'
-
-    // Grafana Cloud typically doesn't allow direct browser requests due to CORS
+    // Determine if using proxy or direct connection
     this.isBrowserEnvironment = typeof window !== 'undefined'
+    this.useProxy = this.isBrowserEnvironment
+    this.proxyEndpoint = this.useProxy ? '/api/logs' : null
+
+    // Disable in local development due to CORS restrictions (when not using proxy)
+    this.isLocalDev = import.meta.env.MODE === 'development' && window.location.hostname === 'localhost'
     this.corsIssue = false
 
-    if (this.isLocalDev && this.enabled) {
+    if (this.isLocalDev && this.enabled && !this.useProxy) {
       console.warn('🟡 Loki transport disabled in local development due to CORS restrictions')
       console.warn('🟡 Logs will be stored locally and shipped when deployed to production')
       this.enabled = false
@@ -43,10 +45,14 @@ class LokiTransport {
     }
 
     // Initialize if enabled
-    if (this.enabled && this.endpoint) {
+    if (this.enabled && (this.useProxy || this.endpoint)) {
       this.init()
+      const transportType = this.useProxy ? 'proxy' : 'direct'
+      const activeEndpoint = this.useProxy ? this.proxyEndpoint : this.endpoint
+
       console.log('🚀 LokiTransport initialized', {
-        endpoint: this.endpoint,
+        mode: transportType,
+        endpoint: activeEndpoint,
         tenant: this.tenant,
         environment: this.defaultLabels.environment
       })
@@ -157,9 +163,14 @@ class LokiTransport {
     }
   }
 
-  // Send logs to Loki with retry logic
+  // Send logs to Loki with retry logic (via proxy or direct)
   async sendToLoki(logs, immediate = false) {
-    if (!this.endpoint) throw new Error('Loki endpoint not configured')
+    // Determine endpoint and configuration
+    const endpoint = this.useProxy ? this.proxyEndpoint : `${this.endpoint}/loki/api/v1/push`
+
+    if (!endpoint) {
+      throw new Error(this.useProxy ? 'Proxy endpoint not configured' : 'Loki endpoint not configured')
+    }
 
     // Group logs by stream (labels) for Loki format
     const streams = this.groupLogsByStream(logs)
@@ -173,14 +184,16 @@ class LokiTransport {
       'Content-Type': 'application/json'
     }
 
-    // Add authentication if configured
-    if (this.username && this.password) {
-      headers['Authorization'] = `Basic ${btoa(`${this.username}:${this.password}`)}`
-    }
+    // Only add authentication headers for direct Loki requests
+    // Proxy handles authentication server-side
+    if (!this.useProxy) {
+      if (this.username && this.password) {
+        headers['Authorization'] = `Basic ${btoa(`${this.username}:${this.password}`)}`
+      }
 
-    // Add tenant header if configured
-    if (this.tenant) {
-      headers['X-Scope-OrgID'] = this.tenant
+      if (this.tenant) {
+        headers['X-Scope-OrgID'] = this.tenant
+      }
     }
 
     let lastError
@@ -188,32 +201,38 @@ class LokiTransport {
 
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
-        const response = await fetch(`${this.endpoint}/loki/api/v1/push`, {
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers,
           body: JSON.stringify(payload)
         })
 
         if (!response.ok) {
-          throw new Error(`Loki responded with ${response.status}: ${response.statusText}`)
+          const errorData = await response.json().catch(() => ({}))
+          const errorMessage = this.useProxy
+            ? `Proxy error ${response.status}: ${errorData.error || response.statusText}`
+            : `Loki responded with ${response.status}: ${response.statusText}`
+
+          throw new Error(errorMessage)
         }
 
-        console.debug(`📤 Sent ${logs.length} logs to Loki (attempt ${attempt + 1})`)
+        const transportType = this.useProxy ? 'proxy' : 'direct'
+        console.debug(`📤 Sent ${logs.length} logs via ${transportType} (attempt ${attempt + 1})`)
         return // Success
 
       } catch (error) {
         lastError = error
 
-        // Check if this is a CORS error
-        if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+        // Handle different error types
+        if (!this.useProxy && (error.message.includes('Failed to fetch') || error.name === 'TypeError')) {
           this.corsIssue = true
-          console.warn('🚫 CORS error detected - Grafana Cloud Loki does not allow direct browser requests')
-          console.warn('💡 Consider implementing server-side logging or using a proxy for production logs')
+          console.warn('🚫 CORS error detected - switching to proxy mode recommended')
+          console.warn('💡 Deploy with /api/logs proxy endpoint to resolve this issue')
           this.enabled = false // Disable to prevent further attempts
           break // Don't retry CORS errors
         }
 
-        console.warn(`Failed to send logs to Loki (attempt ${attempt + 1}):`, error.message)
+        console.warn(`Failed to send logs via ${this.useProxy ? 'proxy' : 'direct'} (attempt ${attempt + 1}):`, error.message)
 
         // Wait before retry (except on last attempt or immediate flush)
         if (attempt < retries - 1 && !immediate) {
@@ -256,6 +275,8 @@ class LokiTransport {
       enabled: this.enabled,
       localDevMode: this.localDevMode || false,
       corsIssue: this.corsIssue || false,
+      useProxy: this.useProxy || false,
+      proxyEndpoint: this.proxyEndpoint,
       endpoint: this.endpoint,
       tenant: this.tenant,
       environment: this.defaultLabels.environment,
@@ -282,12 +303,14 @@ class LokiTransport {
 
   // Enable transport
   enable() {
-    if (this.endpoint) {
+    if (this.useProxy || this.endpoint) {
       this.enabled = true
+      this.corsIssue = false // Reset CORS error state
       this.init()
-      console.log('✅ LokiTransport enabled')
+      const mode = this.useProxy ? 'proxy' : 'direct'
+      console.log(`✅ LokiTransport enabled (${mode} mode)`)
     } else {
-      console.error('Cannot enable LokiTransport: endpoint not configured')
+      console.error('Cannot enable LokiTransport: no endpoint or proxy configured')
     }
   }
 }
