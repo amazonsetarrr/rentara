@@ -46,9 +46,8 @@ describe('AddPropertyForm', () => {
     // Fill out the form
     fireEvent.change(screen.getByLabelText('Property Name'), { target: { value: 'Test Property' } })
     fireEvent.change(screen.getByLabelText('Street Address'), { target: { value: '123 Test St' } })
-    fireEvent.change(screen.getByLabelText('ZIP Code'), { target: { value: '12345' } })
+    fireEvent.change(screen.getByLabelText('Postcode'), { target: { value: '12345' } })
     fireEvent.change(screen.getByLabelText('Property Type'), { target: { value: 'apartment' } })
-    fireEvent.change(screen.getByLabelText('Total Units'), { target: { value: '10' } })
 
     // Select a state
     fireEvent.change(screen.getByLabelText('State'), { target: { value: 'Johor' } })
@@ -74,9 +73,8 @@ describe('AddPropertyForm', () => {
         address: '123 Test St',
         city: 'Johor Bahru',
         state: 'Johor',
-        zip_code: '12345',
+        postcode: '12345',
         property_type: 'apartment',
-        total_units: 10,
       })
     })
 
@@ -121,7 +119,7 @@ describe('AddPropertyForm', () => {
     // Fill out other required fields
     fireEvent.change(screen.getByLabelText('Property Name'), { target: { value: 'Test Property' } })
     fireEvent.change(screen.getByLabelText('Street Address'), { target: { value: '123 Test St' } })
-    fireEvent.change(screen.getByLabelText('ZIP Code'), { target: { value: '12345' } })
+    fireEvent.change(screen.getByLabelText('Postcode'), { target: { value: '12345' } })
     fireEvent.change(screen.getByLabelText('Property Type'), { target: { value: 'apartment' } })
 
     // Submit without selecting state and city

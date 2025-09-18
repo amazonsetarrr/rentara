@@ -11,9 +11,8 @@ export default function AddPropertyForm({ onSuccess, onCancel }) {
     name: '',
     address: '',
     city: '',
-    zip_code: '',
-    property_type: '',
-    total_units: 0
+    postcode: '',
+    property_type: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -40,8 +39,7 @@ export default function AddPropertyForm({ onSuccess, onCancel }) {
 
     const submissionData = {
       ...formData,
-      state: selectedState,
-      total_units: parseInt(formData.total_units, 10) || 0
+      state: selectedState
     }
 
     // Basic validation
@@ -127,9 +125,9 @@ export default function AddPropertyForm({ onSuccess, onCancel }) {
         />
 
         <Input
-          label="ZIP Code"
-          name="zip_code"
-          value={formData.zip_code}
+          label="Postcode"
+          name="postcode"
+          value={formData.postcode}
           onChange={handleChange}
           required
           placeholder="e.g., 94102"
@@ -145,17 +143,6 @@ export default function AddPropertyForm({ onSuccess, onCancel }) {
           placeholder="Select property type"
         />
 
-        <div className="md:col-span-2">
-          <Input
-            label="Total Units"
-            type="number"
-            name="total_units"
-            value={formData.total_units}
-            onChange={handleChange}
-            min="0"
-            placeholder="e.g., 24"
-          />
-        </div>
       </div>
 
       <div className="flex justify-end space-x-3 pt-6 border-t">
